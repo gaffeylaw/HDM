@@ -32,7 +32,6 @@ module Fwk
         end if asset[:js]
         config.assets.precompile += files
       end
-      config.assets.precompile +=  ["report_types.css"]
     end
 
 

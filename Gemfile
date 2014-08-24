@@ -79,7 +79,6 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
   gem 'twitter-bootstrap-rails', '2.1.1'
   gem 'jquery-rails','2.1.2'
-  gem 'extjs4-rails'
 end
 
 

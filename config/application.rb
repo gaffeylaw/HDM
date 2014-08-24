@@ -23,7 +23,7 @@ end
 
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
-  Bundler.require(*Rails.groups(:assets => %w(macdev development test)))
+  Bundler.require(*Rails.groups(:assets => %w(development test)))
   # If you want your assets lazily compiled in production, use this line
   # Bundler.require(:default, :assets, Rails.env)
 end
@@ -76,8 +76,6 @@ module Ironmine
     config.filter_parameters += [:password]
     #由于资源文件根据locale，i18n会读取不同的语言的资源文件然后加载到内存中
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
-
-    config.assets.precompile += ["report_types.css"]
 
     # 配置加载系统应用模块
     origin_values = config.paths.dup
