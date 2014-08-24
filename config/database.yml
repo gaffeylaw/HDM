@@ -6,8 +6,8 @@ development:
   database: orcl.hand-china.com
   port: 1521
   pool: 20
-  username: hdm
-  password: hdm
+  username: nhdm
+  password: nhdm
 
 production:
   adapter: oracle_enhanced
@@ -17,5 +17,5 @@ production:
   database: orcl.hand-china.com
   port: 1521
   pool: 20
-  username: hdm
-  password: hdm
+  username: nhdm
+  password: nhdm
