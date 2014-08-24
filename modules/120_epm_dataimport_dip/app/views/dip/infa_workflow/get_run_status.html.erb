@@ -1,0 +1,9 @@
+<%= datatable_view({:count => @count5, :datas => @datas5}) do |builder| %>
+    <% builder.column(:workflow_id, {:title => t(:label_infa_workflow), :width => "140px"}) do |data| %>
+        <%= Dip::InfaWorkflow.find(data.workflow_id).name_alias %>
+    <% end %>
+    <% builder.column(:run_id, {:title => t(:label_interface_status), :width => "140px"}) do |data| %>
+        <%= get_workflow_status(data) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "140px"}) %>
+<% end %>

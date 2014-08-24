@@ -1,0 +1,19 @@
+<style type="text/css">
+  #reportData th,td{
+      text-align:left
+  }
+  #reportData th{
+      background-color: #DBF2F9;
+  }
+</style>
+
+
+<div class="page-block">
+  <% if "PROGRAM".eql?(@report.program_type) %>
+      <%datas = @report.program_instance.data(@report.program_params);%>
+      <%= render :partial=>@report.program_instance.mail_partial,:locals=>{:datas=>datas}%>
+  <% else %>
+    <%= render "irm/reports/show_#{@report.table_show_type.downcase}"%>
+  <% end %>
+</div>
+

@@ -1,0 +1,29 @@
+<%= datatable_view({:count => @count1, :datas => @datas1}) do |builder| %>
+    <% builder.column(:id, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "30px"}) do |data| %>
+        <input type="checkbox" name="valueIds" <%= get_checkbox_att(data.id,data.interface_code)%> value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:interface_no, {:title => t(:label_dip_odi_interface_no), :width => "20px"}) %>
+    <% builder.column(:interface_code, {:title => t(:label_dip_odi_interface_code), :width => "140px"}) %>
+    <% builder.column(:interface_desc, {:title => t(:label_dip_odi_interface_desc), :width => "140px"}) %>
+    <% builder.column(:status, {:title => t(:label_interface_status), :width => "140px"}) do |data| %>
+        <label style="background-color: <%= get_status_color(data.id,data.interface_code) %>"><%= get_interface_status(data.id,data.interface_code)%></label>
+    <% end %>
+<% end %>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#selectAll").bind("click", function () {
+            if ($("#selectAll")[0].checked) {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = true;
+                }
+            } else {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = false;
+                }
+            }
+        });
+    });
+</script>

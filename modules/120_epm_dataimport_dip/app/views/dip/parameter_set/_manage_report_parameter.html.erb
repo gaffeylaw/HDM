@@ -1,0 +1,16 @@
+<div class="modal hide" id="manage_report_parameter_wnd" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body">
+    <div id="manage_report_parameter_wnd_msg"></div>
+    <div class="page-block-body" style="width: 100%">
+      <%= datatable("data_table1", {:action => "get_parameter_data", :controller => "dip/parameter_set", :param_type => Dip::DipConstant::PARAMETER_REPORT}, [],
+                    {:search_box => "searchBox1", :style => "margin-left:2px", :paginator_box => "paginatorBox1", :scroll => {:mode => "xy",:height=>300}}) %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" onclick="save_param_set_param(event)"><%= t(:save) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

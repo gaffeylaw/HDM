@@ -1,0 +1,51 @@
+<div class="modal hide" id="create_value_modal" style="margin-left:-300px ;width: 600px;margin-top: -300px;">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:label_dip_header_value_create) %>:<b id="cur_edit_header"/></h3>
+  </div>
+
+  <div class="modal-body">
+    <div id="create_value_modal_msg"></div>
+    <input type="hidden" id="header_id_new"/>
+
+    <div class="datatable">
+      <div class="table-body include-header">
+        <table>
+          <thead>
+          <tr>
+           <th>
+              <div><%= t(:code) %></div>
+            </th>
+            <th>
+              <div><%= t(:value) %></div>
+            </th>
+            <th>
+              <div><%= t(:label_enable_immediately) %></div>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <% for i in 1..10 %>
+              <tr>
+                <td class="data-col">
+                  <input type="text" id="header_value_code_new<%= i.to_s %>" name="code" style="margin-bottom: 0px"/>
+                </td>
+                <td class="data-col">
+                  <input type="text" id="header_value_new<%= i.to_s %>" name="value" style="margin-bottom: 0px"/>
+                </td>
+                <td class="data-col" style="width: 30px;">
+                  <%= select(:enabled, "status"+i.to_s, [[t(:label_yes), true], [t(:label_no), false]], {:include_blank => false, :default => true},:style=>"width:100%") %>
+                </td>
+              </tr>
+          <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" onclick="new_header_value(event)"><%= t(:save) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

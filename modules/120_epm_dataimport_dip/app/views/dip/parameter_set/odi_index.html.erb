@@ -1,0 +1,83 @@
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t(:label_parameter_set) %></h2>
+      </td>
+      <td class="page-block-button">
+        <button class="btn btn-primary" onclick="show_new_wnd(event)"><%= t(:new) %></button>
+        <button class="btn btn-primary" onclick="show_parameter_wnd(event)"><%= t(:label_parameter_manage) %></button>
+        <%= link_to(t(:back),{:controller=>"dip/odi_interface",:action=>"index"},:class=>"btn btn-primary") %>
+      </td>
+    </tr>
+  </table>
+  <div class="page-block-body" style="width: 100%">
+    <%= datatable("data_table", {:action => "get_data", :controller => "dip/parameter_set", :param_type => Dip::DipConstant::PARAMETER_ODI}, [],
+                  {:search_box => "searchBox", :style => "margin-left:2px", :paginator_box => "paginatorBox", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+<%= render "dip/parameter_set/edit" %>
+<%= render "dip/parameter_set/create" %>
+<%= render "dip/parameter_set/manage_odi_parameter" %>
+<%= render "dip/parameter/odi_parameter" %>
+<%= render "dip/parameter/odi_parameter_form" %>
+<script type="text/javascript">
+    $("document").ready(function () {
+        var params = {};
+        params['param_type'] = "<%= Dip::DipConstant::PARAMETER_ODI%>";
+        var current_target = $("#data_table").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+    });
+    function show_new_wnd(event) {
+        $("#new_parameter_set_name").attr("param_type",'<%= Dip::DipConstant::PARAMETER_ODI%>')
+        $("#create_parameter_set_modal").modal("show");
+    }
+    function edit_parameter_set(event, id, name) {
+        $("#edit_parameter_set_id").val(id);
+        $("#edit_parameter_set_name").val(name);
+        $("#edit_parameter_set_modal").modal("show");
+    }
+    function delete_parameter_set(event, id) {
+        $.post("<%= url_for({:action=>:destroy,:controller=>'dip/parameter_set',:format=>:json})%>", {
+            id:id
+        }, function (result) {
+            var current_target = $("#data_table").data("datatable").target;
+            current_target.load();
+        }, "json");
+    }
+    function select_parameter(event,id){
+        $("#manage_odi_parameter_wnd").attr("parameter_set_id",id);
+        $("#manage_odi_parameter_wnd").modal("show");
+        var params = {};
+        params['parameter_set_id'] = id;
+        var current_target = $("#data_table1").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.loadPage(1);
+    }
+    function save_param_set_param(event){
+        var checkboxes = $("input[name='columnIds1']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:add_parameter,:controller => "dip/parameter_set",:format=>:json})%>",
+                    {
+                        valueIds: selectedIds,
+                        parameter_set_id:$("#manage_odi_parameter_wnd").attr("parameter_set_id")
+                    }, function (result) {
+                        showFadeBackMessage("manage_odi_parameter_wnd_msg", result.msg);
+                        var current_target = $("#data_table1").data("datatable").target;
+                        current_target.load();
+                    }, "json");
+        }
+    }
+    function show_parameter_wnd(event){
+        $("#odi_parameter_wnd").modal("show");
+    }
+</script>

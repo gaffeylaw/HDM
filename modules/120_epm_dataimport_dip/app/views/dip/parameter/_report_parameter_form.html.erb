@@ -1,0 +1,34 @@
+<div class="modal hide" id="report_parameter_form_wnd">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body">
+    <div id="report_parameter_form_wnd_msg"></div>
+    <form id="report_parameter_form_wnd_form">
+      <table class="detailList" cellpadding="0" cellspacing="0" border="0">
+        <tbody>
+        <tr>
+          <td class="label-col"><label><%= t(:label_parameter_no) %></label></td>
+          <td class="data-col"><input type="text" id="_parameter_index_no" style="width: 300px"/></td>
+        </tr>
+        <tr>
+          <td class="label-col"><label><%= t(:label_parameter_name) %></label></td>
+          <td class="data-col"><input type="text" id="_parameter_name" style="width: 300px"/></td>
+        </tr>
+        <tr>
+          <td class="label-col"><label><%= t(:label_parameter_alias) %></label></td>
+          <td class="data-col"><input type="text" id="_parameter_name_alias" style="width: 300px"/></td>
+        </tr>
+        <tr>
+          <td class="label-col"><label><%= t(:label_parameter_value) %></label></td>
+          <td class="data-col"><%= select("_parameter","header_id",Dip::Header.order("name").collect{|h|[h.name,h.id]},{:include_blank=>true},:style=>"width: 310px") %></td>
+        </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" onclick="save_report_parameter(event)"><%= t(:save) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

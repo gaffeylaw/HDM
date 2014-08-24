@@ -1,0 +1,149 @@
+<!--页面结构-->
+<div id="odi_interface_msg"></div>
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title" style="width: 150px">
+        <h2 class="block-title"><%= t(:label_dip_odi_interface) %></h2>
+      </td>
+      <td class="page-block-button">
+        <button class="btn btn-primary" onclick="show_new_wnd(event)"><%= t(:label_new_interface) %></button>
+        <button class="btn btn-primary" onclick="delete_interface(event)"><%= t(:delete) %></button>
+        <button class="btn btn-primary" onclick="parameter_manage(event)"><%= t(:label_parameter_manage) %></button>
+        <%= link_to t(:label_odi_10_server_manage), {:action => "index", :controller => "dip/odi10_server"}, :class => "btn btn-primary" %>
+        <%= link_to t(:label_odi_11_server_manage), {:action => "index", :controller => "dip/odi_server"}, :class => "btn btn-primary" %>
+      </td>
+      <td class="page-block-help" style="width: 250px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="page-block-body" style="width: 100%">
+    <table class="split-table" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+      <tr>
+        <td class="side-bar">
+          <%= render :partial => "/irm/common/tree_sidebar_template", :locals => {:tree_url => url_for(:controller => "dip/dip_category", :action => "get_tree_data",
+                                                                                                       :category_type => Dip::DipConstant::CATEGORY_ODI, :format => :json),
+                                                                                  :tree_id => "tree-div",
+                                                                                  :target_table => "interface_table",
+                                                                                  :li_attrs => "id,name"} %>
+        </td>
+        <td class="side-content" style="padding-left: 2px">
+          <%= datatable("interface_table", {:action => "get_data", :controller => "dip/odi_interface"}, [],
+                        {:search_box => "searchBox", :paginator_box => "paginatorBox", :scroll => {:mode => "xy"}}) %>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+<%= render "dip/odi_interface/form_wnd" %>
+<%= render "dip/odi_interface/parameter_manage" %>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#tree-div").bind('nodeListener', function (event, element) {
+            $("#_category_name").val(element.attr('name'));
+            $("#parameter_wnd").attr("category_id", element.attr('id'));
+            var params = {};
+            params['categoryId'] = element.attr('id');
+            var current_target = $("#interface_table").data("datatable").target;
+            current_target.data.options.defaultOptions = params;
+            current_target.data.options.searchOptions = {};
+            current_target.loadPage(1);
+        });
+    });
+    function show_new_wnd(event) {
+        $("#modal_interface_wnd_form")[0].reset();
+        $("#modal_interface_wnd").attr("action", "create");
+        $("#modal_interface_wnd").modal("show");
+    }
+    function save_change(event) {
+        var url = null;
+        if ($("#modal_interface_wnd").attr("action") == "create") {
+            url = "<%= url_for({:controller => "dip/odi_interface",:action => "create",:format=>:json})%>";
+        }
+        else if ($("#modal_interface_wnd").attr("action") == "update") {
+            url = "<%= url_for({:controller => "dip/odi_interface",:action => "update",:format=>:json})%>";
+        }
+        if (url) {
+            $.post(url, {
+                id: $("#modal_interface_wnd").attr("interface_id"),
+                interface_no: $("#_interface_no").val(),
+                interface_code: $("#_interface_code").val(),
+                interface_name: $("#_interface_name").val(),
+                interface_version: $("#_interface_version").val(),
+                interface_context: $("#_interface_context").val(),
+                interface_desc: $("#_interface_desc").val(),
+                interface_server: $("#_interface_server").val(),
+                interface_category: $("#_interface_category").val()
+            }, function (result) {
+                if (result["success"]) {
+                    $("#modal_interface_wnd").modal("hide");
+                    showFadeBackMessage("odi_interface_msg", result.msg);
+                    var current_target = $("#interface_table").data("datatable").target;
+                    current_target.load();
+                } else {
+                    showFadeBackMessage("modal_interface_wnd_msg", result.msg);
+                }
+            }, "json");
+        }
+    }
+    function delete_interface(event) {
+        var checkboxes = $("input[name='valueIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.get("<%= url_for({:action=>:destroy,:controller => "dip/odi_interface",:format=>:json})%>",
+                    {valueIds: selectedIds}, function (result) {
+                        showFadeBackMessage("odi_interface_msg", result.msg);
+                        var current_target = $("#interface_table").data("datatable").target;
+                        current_target.loadPage(1);
+                    });
+        }
+    }
+    function show_edit_interface(event, data) {
+        var interface = JSON.parse(data)['odi_interface'];
+        $("#modal_interface_wnd").attr("action", "update");
+        $("#modal_interface_wnd").attr("interface_id", interface['id']);
+        $("#_interface_no").val(interface["interface_no"]);
+        $("#_interface_code").val(interface['interface_code']);
+        $("#_interface_name").val(interface['interface_name']);
+        $("#_interface_context").val(interface['interface_context']);
+        $("#_interface_version").val(interface['interface_version']);
+        $("#_interface_desc").val(interface['interface_desc']);
+        $("#_interface_server").val(interface['server_id']);
+        $("#_interface_category").val(interface['category_id']);
+        $("#modal_interface_wnd").modal("show");
+    }
+    function parameter_manage(event) {
+        if ($("#parameter_wnd").attr("category_id") && $("#parameter_wnd").attr("category_id") != "unclassified") {
+            $.get("<%= url_for({:action => 'get_parameter_set',:controller => 'dip/odi_interface'})%>", {
+                category_id: $("#parameter_wnd").attr("category_id")
+            }, function (result) {
+                $("#_parameter_set_id").val(result);
+            }, "json");
+            $("#parameter_wnd").modal("show");
+        } else {
+            showFadeBackMessage("odi_interface_msg", ["<%= t(:label_select_category)%>"])
+        }
+    }
+    function save_parameter(event) {
+        $.post("<%= url_for({:action => "bind_parameter_set",:controller => "dip/odi_interface"})%>", {
+            parameter_set_id: $("#_parameter_set_id").val(),
+            category_id: $("#parameter_wnd").attr("category_id")
+        }, function (result) {
+            if (result["success"]) {
+                $("#parameter_wnd").modal("hide");
+                showFadeBackMessage("odi_interface_msg", result["msg"]);
+            } else {
+                showFadeBackMessage("parameter_wnd_msg", result["msg"]);
+            }
+        }, "json");
+    }
+</script>

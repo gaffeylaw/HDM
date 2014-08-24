@@ -1,0 +1,20 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% @template_column.each do |v| %>
+        <% builder.column(v.view_column.to_s.downcase, {:title => v.name, :width => (v.column_length).to_i.to_s, :sortable => true, :searchable => true}) do |data| %>
+            <label row_id="<%= data[:row_id] %>" style="display: block;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>                    <label data_id="<%= data[:row_id] %>"
+                           name="<%= v.view_column.to_s.downcase %>"
+                           combination_record="<%= data.combination_record %>"
+                           value="<%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %>"
+                           style="display: none;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>
+        <% end %>
+    <% end %>
+    <% ['updated_at', 'updated_by', 'created_at', 'created_by'].each do |h| %>
+        <% builder.column(h, {:title => t(h), :width => "120px"}) do |data| %>
+            <%= column_format(h, data[h]) %>
+        <% end %>
+    <% end %>
+    <% @headers.each do |h| %>
+        <% builder.column("dip"+h.header_id.to_s.downcase, {:title => Dip::Header.find(h.header_id).name, :width => "130px"}) %>
+    <% end %>
+<% end %>
+

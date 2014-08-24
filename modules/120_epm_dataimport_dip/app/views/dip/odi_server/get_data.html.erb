@@ -1,0 +1,35 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "30px"}) do |data| %>
+        <input type="checkbox" name="valueIds" value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:operation, {:title => t(:operation), :width => "80px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="show_edit_server(event,<%="\'#{data[:id]}\'"%>)"><%= t(:edit) %></a>
+    <% end %>
+    <% builder.column(:server_name, {:title => t(:label_odi_server_name), :width => "180px", :searchable => true}) %>
+    <% builder.column(:server_desc, {:title => t(:label_odi_server_desc), :width => "180px"}) %>
+    <% builder.column(:url, {:title => t(:label_odi_server_url), :width => "180px"}) %>
+    <% builder.column(:workspace, {:title => t(:label_odi_server_workspace), :width => "180px"}) %>
+    <% builder.column(:odi_user, {:title => t(:label_odi_server_odi_user), :width => "180px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "180px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "140px"}) %>
+<% end %>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#selectAll").bind("click", function () {
+            if ($("#selectAll")[0].checked) {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = true;
+                }
+            } else {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = false;
+                }
+            }
+        });
+    });
+</script>

@@ -1,0 +1,43 @@
+<table class="page-block-header" style="table-layout: fixed;width: 100%;">
+  <tr style="height: 14px">
+    <td class="page-block-button" style="text-align: right;">
+      <button class="btn btn-primary" onclick="add_report_authority_wnd(event)"><%= t(:label_dip_add_report_authority) %></button>
+      <button class="btn btn-primary" onclick="drop_report_authority(event)"><%= t(:delete_authority) %></button>
+    </td>
+  </tr>
+</table>
+<%= datatable("report_table", {:action => "get_authorized_report", :controller => "dip/dip_authority"}, [],
+              { :paginator_box => "paginatorBox2",:lazy_load=>true,
+               :scroll => {:mode => "xy", :height => 340}}) %>
+<script type="text/javascript">
+    function add_report_authority_wnd(event){
+        if ($("#cur_target_id").val().length>0) {
+            $("#target_to_add_report").text($("#cur_org_user_label").text());
+            var params = {};
+            params['targetId'] = $("#cur_target_id").val();
+            params['targetType'] = $("#cur_note_type").val();
+            var current_target = $("#data_area3").data("datatable").target;
+            current_target.data.options.defaultOptions = params;
+            current_target.loadPage(1);
+            $("#new_report_authority_modal").modal("show");
+        }
+    }
+    function drop_report_authority(event){
+        var checkboxes = $("input[name='valueIds2']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:destroy_authorized,:controller => "dip/dip_authority",:format=>:json})%>",
+                    {valueIds:selectedIds, targetId:$("#cur_target_id").val()}, function (result) {
+                        var current_target = $("#report_table").data("datatable").target;
+                        current_target.loadPage(1);
+                    });
+        }
+    }
+</script>

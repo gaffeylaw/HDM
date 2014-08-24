@@ -1,0 +1,123 @@
+<%= setting_title %>
+
+<div id="edit_template_msg"></div>
+<div class="tabs-container">
+  <div class="mx-tabs" id="tabNav">
+    <ul class="clear-fix">
+      <li class="active" id="nav_0"><a href="#tab0" data-toggle="tab"><%= t(:label_edit_template) %></a></li>
+      <li id="nav_1"><a href="#tab1" data-toggle="tab"><%= t(:label_template_column_edit) %></a></li>
+    </ul>
+  </div>
+  <div class="mx-tab-content" style="overflow: hidden;">
+    <div class="mx-tab-pane active" id="tab0">
+      <%= render "dip/template/show" %>
+    </div>
+    <div class="mx-tab-pane" id="tab1">
+      <div class="page-block-body">
+        <table class="page-block-footer">
+          <tr>
+            <td class="page-block-title">
+              <%= t(:label_template_columns_list) %>&nbsp;&nbsp;&nbsp;&nbsp;
+            </td>
+            <td class="page-block-button">
+              <button class="btn btn-primary" data-toggle="button" onclick="create_column(event)"><%= t(:newColumn) %></button>
+              &nbsp;
+              <button class="btn btn-primary" data-toggle="button" onclick="deleteColumns(event)"><%= t(:delete) %></button>
+            </td>
+          </tr>
+        </table>
+        <%= datatable("lookup_type", {:action => "get_data", :format => "json", :controller => "dip/template_column", :template_id => @template[:id]},
+                      [],
+                      {:search_box => "searchBox", :scroll => {:mode => "x"}, :drag_sort => {:save_url => url_for(:action => :reorder, :controller => "dip/template_column"), :format => :json}}) %>
+      </div>
+    </div>
+  </div>
+</div>
+<input id="cur_template" type="hidden" value="<%= @template[:id] %>"/>
+<%= render "dip/template_column/edit_form" %>
+<%= render "dip/template_column/create_form" %>
+<%= render "dip/template_validation/new" %>
+<%= render "dip/template_validation/index" %>
+<%= render "dip/template_validation/edit" %>
+<script type="text/javascript">
+    $("document").ready(function () {
+        var args = ['dip_temporary_table_10', 'dip_temporary_table_20',
+            'dip_temporary_table_30', 'dip_temporary_table_40',
+            'dip_temporary_table_50', 'dip_temporary_table_100'];
+        $("#tmp_table").typeahead({
+            source:args
+        });
+    });
+    function edit_column(event, id) {
+        $.get("<%= url_for({:action=>:edit,:controller => "dip/template_column",:format=>:json})%>" + "?id=" + id, function (result) {
+            $("#_name").val(result.template_column.name);
+            $("#_column_name").val(result.template_column.column_name);
+            $("#cur_template_column").val(id);
+            $("#_data_type").val(result.template_column.data_type);
+            $("#_value_list").val(result.template_column.value_list);
+            $("#_view_column").val(result.template_column.view_column);
+            $("#_column_length").val(parseInt(result.template_column.column_length));
+            if (result.template_column.is_pk) {
+                $("#_is_pk").attr("checked", true)
+            }
+            else {
+                $("#_is_pk").attr("checked", false)
+            }
+            if (result.template_column.mapped) {
+                $("#_mapped").attr("checked", true)
+            }
+            else {
+                $("#_mapped").attr("checked", false)
+            }
+            if (result.template_column.omitted) {
+                $("#_omitted").attr("checked", true)
+            }
+            else {
+                $("#_omitted").attr("checked", false)
+            }
+            if (result.template_column.editable) {
+                $("#_editable").attr("checked", true)
+            }
+            else {
+                $("#_editable").attr("checked", false)
+            }
+            $("#edit_modal").modal("show");
+        });
+    }
+    function create_column(event) {
+        var inputs = $("#create_modal").find("input[type='text']");
+        for (var m in inputs) {
+            inputs[m].value = "";
+        }
+        $("#create_modal").modal("show")
+    }
+    function deleteColumns(event) {
+        var checkboxes = $("input[name='columnIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:destroy,:controller => "dip/template_column",:format=>:json})%>", {columnIds:selectedIds}, function (result) {
+                showFadeBackMessage("edit_template_msg", result.msg);
+                var current_target = $("#lookup_type").data("datatable").target;
+                current_target.loadPage(1);
+            }, "json");
+        }
+    }
+
+    function showValidationManage(event, id) {
+        $("#cur_column_id").val(id);
+        var params = {};
+        params['columnId'] = id;
+        var current_target = $("#data_table2").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#index_template_validation_modal").modal("show");
+    }
+</script>

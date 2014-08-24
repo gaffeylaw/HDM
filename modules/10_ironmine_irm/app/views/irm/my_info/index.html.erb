@@ -1,0 +1,69 @@
+<%= common_title(:model_meaning=>t(:label_irm_person_info)) %>
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header"><tr>
+    <td class="page-block-title">
+      <h2 class="block-title"><%=t(:label_irm_identity_edit)%>&nbsp;<%= @person.login_name%></h2>
+    </td>
+    <td class="page-block-button">
+      <%= link_to t(:edit), {:action => "edit"},:zone=>"system_content",:class=>"btn btn-primary"%>
+    </td>
+  </tr></table>
+  <div class="page-block-body">
+    <div class="sub-page-block">
+      <div class="sub-page-block-header">
+        <h3 class="sub-page-block-title"><%=t(:label_irm_person_info)%></h3>
+      </div>
+      <div class="sub-page-block-body">
+        <table class="show-table">
+          <tbody>
+              <tr>
+                <td class="label-col"><label><%=t(:label_irm_identity_login_name)%></label></td>
+                <td class="data-col"><%= @person.login_name%></td>
+                <td class="label-col"><label><%=(t :label_irm_person_role)%></label></td>
+                <td class="data-col"><%=@person[:role_name]%></td>
+              </tr>
+              <tr>
+                <td class="label-col"><label><%=(t :label_irm_person_email_address)%></label></td>
+                <td class="data-col"><%=@person.email_address%></td>
+                <td class="label-col"><label><%=t(:label_irm_person_profile)%></label></td>
+                <td class="data-col"><%=@person[:profile_name]%></td>
+              </tr>
+              <tr>
+                <td class="label-col"><label><%=(t :label_irm_person_last_name)%></label></td>
+                <td class="data-col"><%=@person.last_name%></td>
+                <td class="label-col"><label><%=t(:label_irm_person_organization)%></label></td>
+                <td class="data-col"><%= @person[:organization_name] %></td>
+              </tr>
+              <tr>
+                <td class="label-col"><label><%=(t :label_irm_person_first_name)%></label></td>
+                <td class="data-col"><%=@person.first_name%></td>
+                <td class="label-col"><label><%=t(:label_irm_person_bussiness_phone)%></label></td>
+                <td class="data-col"><%=@person.bussiness_phone%></td>
+              </tr>
+              <tr>
+                <td class="label-col"><%= t(:label_irm_identity_language_code) %></td>
+                <td class="data-col"><%= @person[:language_description] %></td>
+                 <td class="label-col"><label><%=t(:label_irm_person_fax_number)%></label></td>
+                 <td class="data-col"><%=@person.fax_number%></td>
+              </tr>
+              <tr>
+                <td class="label-col"><label><%=t(:label_irm_person_notification_lang)%></label></td>
+                <td class="data-col"><%=@person[:notification_lang_description]%></td>
+                 <td class="label-col"><label><%=t(:label_irm_person_mobile_phone)%></label></td>
+                 <td class="data-col"><%=@person.mobile_phone%></td>
+              </tr>
+              <tr>
+                <td class="label-col"><label><%=t(:label_irm_person_home_phone)%></label></td>
+                <td class="data-col"><%=@person.home_phone%></td>
+                <td class="label-col"><label><%=t(:label_irm_person_security_flag)%></label></td>
+                <td class="data-col"><%= @person.security_flag %></td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+

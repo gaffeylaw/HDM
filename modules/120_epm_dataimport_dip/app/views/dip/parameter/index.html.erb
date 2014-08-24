@@ -1,0 +1,49 @@
+<%= common_title %>
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t(:label_dip_parameter) %></h2>
+      </td>
+      <td class="page-block-button">
+        <button class="btn btn-primary" onclick="show_new_wnd(event)"><%= t(:new) %></button>
+        <%= link_to t(:back), {:action => "index", :controller => "dip/parameter_set",:param_type => params[:param_type],:back_controller=>params[:back_controller]}, :class => "btn btn-primary" %>
+      </td>
+    </tr>
+  </table>
+  <div class="page-block-body" style="width: 100%">
+    <%= datatable("data_table", {:action => "get_data", :controller => "dip/parameter",:param_type => params[:param_type], :parameter_set_id => params[:id]}, [],
+                  {:search_box => "searchBox", :style => "margin-left:2px", :paginator_box => "paginatorBox", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+<%= render "dip/parameter/edit" %>
+<%= render "dip/parameter/create" %>
+<script type="text/javascript">
+    $("document").ready(function () {
+        var params = {};
+        params['parameter_set_id'] = "<%= params[:id]%>";
+        params['param_type']="<%= params[:param_type]%>"
+        var current_target = $("#data_table").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+    });
+    function show_new_wnd(event) {
+        $("#create_parameter_modal").modal("show");
+    }
+    function edit_parameter(event, id, indexNo, headerId,name,scope) {
+        $("#edit_parameter_id").val(id);
+        $("#edit_parameter_index_no").val(indexNo);
+        $("#edit_parameter_header_id").val(headerId);
+        $("#edit_parameter_scope").val(scope);
+        $("#edit_parameter_name").val(name);
+        $("#edit_parameter_modal").modal("show");
+    }
+    function delete_parameter(event, id) {
+        $.post("<%= url_for({:action=>:destroy,:controller=>'dip/parameter',:format=>:json})%>", {
+            id:id
+        }, function (result) {
+            var current_target = $("#data_table").data("datatable").target;
+            current_target.load();
+        }, "json");
+    }
+</script>

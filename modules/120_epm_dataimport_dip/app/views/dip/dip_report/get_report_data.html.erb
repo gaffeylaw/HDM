@@ -1,0 +1,5 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% i=0;@headers.each do |v| %>
+      <% builder.column(v.to_s.strip, {:title => @header_titles[i].to_s.strip, :width => "180px"}) %>
+    <% i+=1;end %>
+<% end %>

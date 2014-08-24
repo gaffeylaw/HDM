@@ -1,0 +1,95 @@
+<%= common_title %>
+<div class="page-block">
+  <%= form_tag({:action => :upload, :id => params[:id]}, :multipart => true) do %>
+      <% if flash[:errors]&&flash[:errors].any? %>
+          <div class="alert alert-error">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <% flash[:errors].each do |e| %>
+                <%= e %>
+                <br/>
+            <% end %>
+          </div>
+      <% end %>
+      <table class="page-block-header">
+        <tr class="page-block-title">
+          <td>
+            <h2><%= t(:label_cur_template) %> : <%= Dip::Template.find(params[:id]).name %>
+            </h2>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <% headers=Dip::CombinationHeader.where(:combination_id => Dip::Template.find(params[:id]).combination_id).order(:header_id)
+               i=0
+               headers.each do |h| %>
+                <%= Dip::Header.find(h.header_id).name %>:
+                <% if i==0 %>
+                    <%= select :key, i.to_s, getInitList(h.header_id,params[:id]), {:include_blank => true} %>
+                <% else %>
+                    <%= select :key, i.to_s, [], {:include_blank => true} %>
+                <% end %>
+                <% i=i+1 %>
+            <% end %>
+            <input type="hidden" value="<%= params[:id] %>" id="templateId"/>
+          </td>
+        </tr>
+        <tr class="sub-page-block-header">
+          <td>
+            <% if  Dip::Template.find(params[:id]).increment_import %>
+                <%= t(:label_merge) %>
+                <input type="radio" name="batchinsert" id="batch_insert_yes" checked="checked" value="true"/>
+            <% end %>
+            <% if  Dip::Template.find(params[:id]).overwritable %>
+                <%= t(:label_replace) %>
+                <input type="radio" name="batchinsert" id="batch_insert_no" checked="checked" value="false">
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <td class="sub-page-block-body">
+            <%= t(:label_dip_upload) %> <%= file_field("file", "file", :required => true) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <%= submit_tag(t(:import), {:class => "btn btn-primary"}) %>
+            <%= link_to t(:back), {:action => :index, :controller => "dip/template"}, :class => "btn btn-primary" %>
+          </td>
+        </tr>
+      </table>
+  <% end %>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var i = 0;
+        while ($("#key_" + i).length != 0) {
+            $("#key_" + i).bind('change', function (event) {
+                var curId = event.target.id
+                var index = parseInt(curId.split("_")[1])
+                var params = []
+                for (var i = 0; i <= index; i++) {
+                    if ($("#key_" + i).val()) {
+                        params[i] = $("#key_" + i).val();
+                    }
+                    else {
+                        return
+                    }
+                }
+                if ($("#key_" + (index + 1)).length == 0) {
+                    return
+                }
+                $.post("<%= url_for({:action=>:next_value_list,:controller => "dip/template",:format=>:html})%>", {valueIds:params, templateId:$("#templateId").val()}, function (result) {
+                    var index = result.index;
+                    var values = result.values;
+                    var html = ""
+                    for (var i = 0; i < values.length; i++) {
+                        html = html + "<option value='" + values[i][1] + "'>" + values[i][0] + "</option>"
+                    }
+                    $("#key_" + index).html(html);
+
+                }, "json")
+            });
+            i++;
+        }
+    });
+</script>
+
+
+
+

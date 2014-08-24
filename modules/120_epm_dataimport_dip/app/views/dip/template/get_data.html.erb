@@ -1,0 +1,15 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "180px"}) do |data| %>
+        <%= link_to(t(:export), {:controller => "dip/template", :action => "export", :format => "xls", :id => data[:id]}) %>&nbsp;
+        <%= link_to(t(:import), {:controller => "dip/template", :action => "import", :id => data[:id]}) %>
+        <%= link_to(t(:query), {:controller => "dip/template", :action => "query", :id => data[:id]}) %>
+    <% end %>
+    <% builder.column(:name, {:title => t(:label_dip_template_name), :width => "180px", :searchable => true}) %>
+    <% builder.column(:temporary_table, {:title => t(:label_dip_tmp_table), :width => "180px"}) %>
+    <% builder.column(:table_name, {:title => t(:label_dip_actual_table), :width => "180px"}) %>
+    <% builder.column(:query_view, {:title => t(:label_dip_query_view), :width => "180px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "180px"}) do |data| %>
+        <%= get_username(data[:created_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "180px"}) %>
+<% end %>

@@ -1,0 +1,84 @@
+<%= setting_title %>
+<%= form_for(@location,:url=>{:action=>"update"},:builder => LabellingFormBuilder) do |f| %>
+<%= hidden_field_tag :return_url,@return_url %>
+<%= f.hidden_field :company_id,:value=>@company_id  %>
+<div id="ep" class="edit-block page-block">
+  <div class="pbHeader">
+    <table cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+        <tr>
+          <td class="pbTitle"><h2 class="mainTitle"><%=t(:label_irm_location_edit)%></h2></td>
+          <td id="topButtonRow" class="pbButton">
+            <div class="button"><%= f.submit t(:save)%></div>
+            <div class="button"><%= link_to t(:cancel), @return_url%></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pbBody">
+    <%= error_for @location%>
+    <div id="head_1_ep" class="pbSubheader first tertiaryPalette">
+      <span class="pbSubExtra">
+        <span class="requiredLegend"><span class="requiredExampleOuter">
+          <span class="requiredExample">&nbsp;</span></span>
+           <span class="requiredMark">*</span><span class="requiredText"> = <%=t(:label_is_required)%></span></span></span>
+      <h3><%=t(:label_irm_location_info)%></h3>
+    </div>
+    <div class="pbSubsection">
+      <table class="detailList" cellpadding="0" cellspacing="0" border="0">
+        <tbody>
+            <tr>
+              <td class="labelCol"><label><%=(t :label_irm_location_organization)%></label></td>
+              <td class="dataCol"><%=f.select(:organization_id,"<option value=\"\">--- #{t(:actionview_instancetag_blank_option)} ---</option>".html_safe +
+                                                options_from_collection_for_select(current_organization(@company_id),:id,:wrap_name,@location.organization_id),{},
+                                            :action=>url_for(:controller=>"irm/departments",:action=>"belongs_to",
+                                                             :organization_id=>"cascade_id",:company_id=>@company_id),
+                                            :choice_title=>t(:actionview_instancetag_blank_option),
+                                            :required=>true,
+                                  :cascade=>"department_select")%></td>
+              <td class="labelCol"><label><%=(t :label_irm_location_site_group)%></label></td>
+
+               <td class="dataCol"><%=f.select(:site_group_code,available_site_group,{},:required=>true,:id=>"site_group_code")%></td>
+            </tr>
+            <tr>
+              <td class="labelCol"><label><%=(t :label_irm_location_department)%></label></td>
+              <td class="dataCol"><%= f.blank_select(:department_id,available_department(@location.organization_id),{},
+                                  {:required=>false,
+                                   :id=>"department_id",
+                                   :href=>url_for(:controller=>"irm/departments",:action=>"get_by_organization",:format=>"json",:organization_id=>"{organization_id}"),
+                                   :depend=>"organization_id"
+                                   }) %></td>
+
+              <td class="labelCol"><%=(t :label_irm_location_site)%></td>
+              <td class="dataCol"><%= f.blank_select(:site_code,available_site(@location.site_group_code),{},
+                                  {:required=>true,
+                                   :id=>"site_code",
+                                   :href=>url_for(:controller=>"irm/sites",:action=>"get_by_site_group_code",:format=>"json",:site_group_code=>"{site_group_code}"),
+                                   :depend=>"site_group_code"
+                                   }) %></td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="pbBottomButtons">
+    <table cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+        <tr>
+          <td class="pbTitle"></td>
+          <td id="bottomButtonRow" class="pbButtonb">
+            <div class="button"><%= f.submit t(:save)%></div>
+            <div class="button"><%= link_to t(:cancel),@return_url%></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% end %>
+<script type="text/javascript">
+  GY.use("cascadeselect",function(Y){
+     new Y.CascadeSelect({source: "#site_group_code",target:["#site_code"]});
+  });
+</script>

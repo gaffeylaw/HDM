@@ -1,0 +1,27 @@
+<%= datatable_view({:count => @count1, :datas => @datas1}) do |builder| %>
+    <% builder.column(:id, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "40px"}) do |data| %>
+        <input type="checkbox" name="valueIds" value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:index_no, {:title => t(:label_dip_infa_workflow_index_no), :width => "20px"}) %>
+    <% builder.column(:name_alias, {:title => t(:label_dip_infa_workflow_name_alias), :width => "200px"}) %>
+    <% builder.column(:name, {:title => t(:name), :width => "200px"}) %>
+
+<% end %>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#selectAll").bind("click", function () {
+            if ($("#selectAll")[0].checked) {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = true;
+                }
+            } else {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = false;
+                }
+            }
+        });
+    });
+</script>

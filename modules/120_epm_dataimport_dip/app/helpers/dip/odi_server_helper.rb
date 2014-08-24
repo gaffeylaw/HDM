@@ -1,0 +1,2 @@
+module Dip::OdiServerHelper
+end

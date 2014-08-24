@@ -1,0 +1,85 @@
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t(:label_dip_infa_workflow_run) %></h2>
+      </td>
+      <td class="page-block-help" style="width: 250px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div id="run_infa_workflow_msg"></div>
+  <div class="page-block-body" style="width: 100%">
+    <%= datatable("data_table", {:action => "get_run_data", :controller => "dip/infa_workflow"}, [],
+                  {:search_box => "searchBox", :style => "margin-left:2px", :paginator_box => "paginatorBox", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+<%= render "select_workflow" %>
+<%= render "select_parameter" %>
+<%= render "run_status" %>
+<script type="text/javascript">
+    function select_interface(event, id) {
+        var params = {};
+        cur_category_id = id;
+        params['category_id'] = id;
+        var current_target = $("#data_table2").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#select_workflow_modal").modal("show")
+    }
+    function query_workflow_status(event, id) {
+        var params = {};
+        params['category_id'] = id;
+        var current_target = $("#data_table5").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#query_status_modal").modal("show")
+    }
+    function show_select_params(event) {
+        var params = {};
+        params['category_id'] = cur_category_id;
+        var current_target = $("#data_table1").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#select_workflow_modal").modal("hide")
+        $("#select_param_modal").modal("show")
+    }
+    function on_previous(event) {
+        $("#select_param_modal").modal("hide")
+        $("#select_workflow_modal").modal("show")
+    }
+    function run_workflow(event) {
+        var workflow_ids = [];
+        var i = 0;
+        var checkboxes = $("input[name='valueIds']").toArray();
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                workflow_ids[i] = checkboxes[checkbox].value;
+                ++i;
+            }
+        }
+        var parameters = {};
+        var params = $("select[name='header[id]']").toArray();
+        for (var p in params) {
+            var id = params[p].attributes["paramid"].value;
+            var value = params[p].value;
+            parameters[id] = value;
+        }
+        $.post("<%= url_for({:action=>:run_workflow,:controller=>"dip/infa_workflow",:format=>:json})%>", {
+            category_id:cur_category_id, workflow_ids:workflow_ids, parameters:parameters
+        }, function (result) {
+            if (result.success) {
+                $("#select_param_modal").modal("hide")
+                showFadeBackMessage("run_msg", result.msg);
+                query_workflow_status(null, cur_category_id);
+            } else {
+                showFadeBackMessage("run_infa_workflow_msg", result.msg);
+            }
+        }, "json");
+    }
+</script>

@@ -1,0 +1,233 @@
+<%= setting_title %>
+<!--页面结构-->
+<div class="page-block">
+  <div id="combination_index_msg"></div>
+  <table class="page-block-header">
+    <tr>
+      <td class="data-col" style="width: 160px">
+        <input type="hidden" id="templateId" value="<%= params[:id] %>"/>
+        <%= t(:label_dip_combination) %>:
+        <%= select(:combination, :id, Dip::Combination.order("name").collect { |h| [h.name, h.id] }, {:include_blank => false},:style=>"width:120px") %>
+      </td>
+      <td class="data-col">
+        <% headers=getHeaders()
+           headers.each do |header| %>
+            <span id="<%= header.id %>" name="header_list">
+              <%= header.name %>:
+              <%= select(:key, header.id, Dip::HeaderValue.where(:header_id => header.id, :enabled => true).order("code").collect { |h| [h.value, h.id] }, {:include_blank => true},:style=>"max-width:200px;",:name=>"key[id]") %>
+              &nbsp;
+            </span>
+        <% end %>
+      </td>
+      <td class="page-block-help" style="width: 220px">
+        <div class="btn-toolbar">
+          <div class="btn-group">
+            <button data-toggle="button" class="btn btn-primary" onclick="showWnd(event)"><%= t(:generate) %></button>
+            <button data-toggle="button" class="btn btn-primary" onclick="showRenameWnd(event)"><%= t(:label_combination_rename) %></button>
+            <!--<button class="btn" data-toggle="button" onclick="deleteCombination(event)"><%= t(:label_delete_combination) %></button>-->
+          </div>
+          <div class="btn-group">
+            <!--<button class="btn" data-toggle="button" onclick="deleteCombinationItems(event)"><%= t(:label_delete_combination_items) %></button>-->
+            <button data-toggle="button" class="btn btn-primary" onclick="enableCombinationItems(event)"><%= t(:label_dip_open) %></button>
+            <button data-toggle="button" class="btn btn-primary" onclick="processCombinationItems(event)"><%= t(:label_in_process) %></button>
+            <button data-toggle="button" class="btn btn-primary" onclick="closeCombinationItems(event)"><%= t(:label_dip_close) %></button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div class="page-block-body">
+    <div id="lookup_type"></div>
+    <%= datatable("lookup_type", {:action => "get_data", :format => "json"},
+                  [],
+                  {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+    <div id="paginator"></div>
+  </div>
+</div>
+<%= render "dip/combination/new" %>
+<%= render "dip/combination/rename" %>
+<script type="text/javascript">
+    function reload_table() {
+        var params = {};
+        params['combinationId'] = $("#combination_id").val();
+        var current_target = $("#lookup_type").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+    }
+    $(document).ready(function () {
+        var params = {};
+        params['combinationId'] = $("#combination_id").val();
+        var current_target = $("#lookup_type").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        reloadHeaderList();
+        for (var i = 0; i < $("select[name='key[id]']").size(); i++) {
+            $("select[name='key[id]']")[i].onchange = function (event) {
+                var params = {};
+                ids = [];
+                j = 0;
+                for (var n = 0; n < $("select[name='key[id]']").size(); n++) {
+                    if ($("select[name='key[id]']")[n].value != undefined && $("select[name='key[id]']")[n].value.length > 0) {
+                        ids[j] = $("select[name='key[id]']")[n].value;
+                        j++;
+                    }
+                }
+                params["headerValueIds"] = ids;
+                var current_target = $("#lookup_type").data("datatable").target;
+                current_target.data.options.searchOptions = params;
+                current_target.loadPage(1);
+            };
+            $("#combination_id").bind('change', function (event) {
+                reload_table();
+                reloadHeaderList();
+            })
+        }
+    });
+    function reloadHeaderList() {
+        $("span[name='header_list']").hide();
+        $.get("<%= url_for({:action=>:getHeaderList,:controller => "dip/combination",:format=>"json"})%>", {combinationId:$("#combination_id").val()}, function (result) {
+            for (var i in result) {
+                $("#" + result[i]).show();
+            }
+        }, "json");
+    }
+    function showWnd(event) {
+        var inputs = $("#create_modal").find("input[type='text']");
+        for (var m in inputs) {
+            inputs[m].value = "";
+        }
+        $("#create_modal").modal("show")
+    }
+    function generateCombination(event) {
+        var checkboxes = $("input[name='headers']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action => :create,:controller => "dip/combination",:format=>:json})%>",
+                    {headerIds:selectedIds, name:$("#combination_name").val()}, function (result) {
+                        if (result.success) {
+                            showFadeBackMessage("combination_index_msg", result.msg);
+                            $("#create_modal").modal("hide");
+                            update_combination_list(result);
+                        } else {
+                            showFadeBackMessage("new_combination_msg", result.msg);
+                        }
+                    }, "json");
+        }
+    }
+    function update_combination_list(result) {
+        var selected = result.selected;
+        var list = result.list;
+        var html = "";
+        for (var i = 0; i < list.length; i++) {
+            html = html + "<option value='" + list[i].combination.id + "'>" + list[i].combination.name + "</option>";
+        }
+        $("#combination_id").html(html);
+        if (selected) {
+            $("#combination_id").val(selected);
+        }
+        reload_table();
+        reloadHeaderList();
+    }
+    function deleteCombinationItems(event) {
+        var checkboxes = $("input[name='combinationIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action => :destroy,:controller => "dip/combination",:format=>:json})%>", {combinationIds:selectedIds}, function (result) {
+                showFadeBackMessage("combination_index_msg", result.msg);
+                reload_table();
+            }, "json");
+        }
+    }
+    function enableCombinationItems(event) {
+        var checkboxes = $("input[name='combinationIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action => :enable,:controller => "dip/combination",:format=>:json})%>", {combinationIds:selectedIds}, function (result) {
+                showFadeBackMessage("combination_index_msg", result.msg);
+                reload_table();
+            }, "json");
+        }
+    }
+
+    function processCombinationItems(event) {
+        var checkboxes = $("input[name='combinationIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action => :in_process,:controller => "dip/combination",:format=>:json})%>", {combinationIds:selectedIds}, function (result) {
+                showFadeBackMessage("combination_index_msg", result.msg);
+                reload_table();
+            }, "json");
+        }
+    }
+
+    function closeCombinationItems(event) {
+        var checkboxes = $("input[name='combinationIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action => :close,:controller => "dip/combination",:format=>:json})%>", {combinationIds:selectedIds}, function (result) {
+                showFadeBackMessage("combination_index_msg", result.msg);
+                reload_table();
+            }, "json");
+        }
+    }
+    function showRenameWnd(event) {
+        $("#combination_name_rename").val($("#combination_id option:selected").text())
+        $("#rename_modal").modal("show")
+    }
+    function deleteCombination(event) {
+        $.post("<%= url_for({:action => :delete,:controller => "dip/combination",:format=>:json})%>", {combinationId:$("#combination_id").val()}, function (result) {
+            showFadeBackMessage("combination_index_msg", result.msg);
+            update_combination_list(result);
+        }, "json");
+    }
+    function renameCombination(event) {
+        $.post("<%= url_for({:action => :rename,:controller => "dip/combination",:format=>:json})%>", {combinationId:$("#combination_id").val(), value:$("#combination_name_rename").val()}, function (result) {
+            if (result.success) {
+                showFadeBackMessage("combination_index_msg", result.msg);
+                $("#rename_modal").modal("hide");
+                update_combination_list(result);
+            } else {
+                showFadeBackMessage("edit_combination_msg", result.msg);
+            }
+
+        }, "json");
+    }
+</script>
+

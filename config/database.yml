@@ -1,0 +1,21 @@
+development:
+  adapter: oracle_enhanced
+  encoding: utf8
+  reconnect: false
+  host: 172.20.0.8
+  database: orcl.hand-china.com
+  port: 1521
+  pool: 20
+  username: hdm
+  password: hdm
+
+production:
+  adapter: oracle_enhanced
+  encoding: utf8
+  reconnect: false
+  host: 172.20.0.8
+  database: orcl.hand-china.com
+  port: 1521
+  pool: 20
+  username: hdm
+  password: hdm

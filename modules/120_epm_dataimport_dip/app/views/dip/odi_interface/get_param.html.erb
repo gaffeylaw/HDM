@@ -1,0 +1,16 @@
+<%= datatable_view({:count => @count2, :datas => @datas2}) do |builder| %>
+    <% builder.column(:index_no, {:title => t(:label_dip_odi_interface_param_no), :width => "30px"}) %>
+    <% builder.column(:name, {:title => t(:label_dip_odi_interface_param_code), :width => "140px"}) %>
+    <% builder.column(:name_alias, {:title => t(:label_dip_odi_interface_param_name), :width => "140px"}) %>
+    <% builder.column(:header_id, {:title => t(:label_dip_odi_interface_header_id), :width => "140px"}) do |data| %>
+        <%= (header=Dip::Header.where(:id => data.header_id).first).nil? ? "":header.name %>
+    <% end %>
+    <% builder.column(:param_value, {:title => t(:label_dip_header_value_value), :width => "140px"}) do |data| %>
+        <% if data[:header_id] %>
+        <%= select :header, :id, getInitValueList(data.header_id), {:include_blank => true},{:paramid=>data.id,:style=>"min-width:120px"} %>
+        <% else %>
+        <input type="text" paramid="<%= data.id %>" id="header_id" name="header[id]" style="width: 110px;"/>
+        <% end%>
+    <% end %>
+    <% builder.column(:param_desc, {:title => t(:label_dip_odi_interface_param_desc), :width => "140px"}) %>
+<% end %>

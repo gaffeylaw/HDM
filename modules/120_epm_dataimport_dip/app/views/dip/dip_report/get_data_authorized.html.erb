@@ -1,0 +1,7 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "50px"}) do |data| %>
+        <%= link_to(t(:show), {:controller => "dip/dip_report", :action => "show", :id => data[:id]}) %>
+    <% end %>
+    <% builder.column(:name, {:title => t(:label_dip_report_name), :width => "180px", :searchable => true}) %>
+    <% builder.column(:descs, {:title => t(:label_dip_report_descs), :width => "180px"}) %>
+<% end %>

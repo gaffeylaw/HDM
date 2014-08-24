@@ -1,0 +1,90 @@
+<%= setting_title %>
+<%= form_for(@template, :url => {:action => "create"}, :builder => CustomFormBuilder) do |f| %>
+    <% content_for :form_block_a do %>
+        <table class="form-table" cellpadding="0" cellspacing="0" border="0">
+          <tbody>
+          <tr>
+            <td class="label-col"><label><%= t(:code) %></label></td>
+            <td class="data-col"><%= f.text_field :code, :required => true, :id => "code", :style => "width:300px" %></td>
+            <td class="label-col"><label><%= t(:label_template_name) %></label></td>
+            <td class="data-col"><%= f.text_field :name, :required => true, :id => "name", :style => "width:300px" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:descs) %></label></td>
+            <td class="data-col"><%= f.text_area :descs, :rows => 1, :cols => 100, :id => "descs", :style => "width:300px" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_actual_table) %></label></td>
+            <td class="data-col"><%= f.text_field :table_name, :required => true, :id => "table_name", :style => "width:300px" %></td>
+            <td class="label-col"><label><%= t(:label_dip_tmp_table) %></label></td>
+            <td class="data-col"><%= f.text_field :temporary_table, :required => true, :id => "tmp_table", "data-provide" => "typeahead", :style => "width:300px" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_query_view) %></label></td>
+            <td class="data-col"><%= f.text_field :query_view, :required => true,:id => "query_view", :style => "width:300px" %></td>
+
+            <td class="label-col"><label><%= t(:label_dip_import_program) %></label></td>
+            <td class="data-col"><%= f.text_field :import_program, :id => "import_program", :style => "width:300px" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_end_program) %></label></td>
+            <td class="data-col"><%= f.text_field :end_program, :id => "end_program", :style => "width:300px" %></td>
+            <td class="label-col"><%= t(:label_dip_template_overwritable) %>
+              <%= f.check_box :overwritable, :id => "overwritable"%></td>
+            <td class="data-col"><%= t(:label_dip_template_increment_import) %>
+              <%= f.check_box :increment_import, :id => "increment_import" %></td>
+
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_template_category) %></label></td>
+            <td class="data-col"><%= f.select :template_category_id, Dip::DipCategory.where(:category_type => Dip::DipConstant::CATEGORY_TEMPLATE).order(:name).collect { |c| [Dip::DipCategory.get_full_path(c), c.id] }, {:required => false, :include_blank => true}, :style => "width:310px" %></td>
+
+            <td class="label-col"><label><%= t(:label_dip_combination) %></label></td>
+            <td class="data-col"><%= f.select :combination_id, Dip::Combination.order("name").collect { |c| [c.name, c.id] }, {:include_blank => true}, :style => "min-width:310px" %></td>
+
+          </tr>
+          </tbody>
+        </table>
+    <% end %>
+    <% content_for :form_buttons do %>
+        <%= link_submit t(:save), {:class => "btn btn-primary"} %>
+        <%= link_to t(:back), {:action => "setting"}, :class => "btn" %>
+    <% end %>
+    <!--页面结构-->
+    <div class="page-block">
+      <table class="page-block-header">
+        <tr>
+          <td class="page-block-title">
+            <h2 class="block-title"><%= t(:label_dip_template_create) %></h2>
+          </td>
+          <td class="page-block-button">
+            <%= content_for :form_buttons %>
+          </td>
+        </tr>
+      </table>
+      <div class="page-block-body">
+        <%= error_for @template %>
+        <div class="sub-page-block">
+          <div class="sub-page-block-header">
+            <%= form_require_info %>
+            <h3 class="sub-page-block-title"><%= t(:label_common_info) %></h3>
+          </div>
+          <div class="sub-page-block-body">
+            <%= content_for :form_block_a %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+<% end %>
+<script type="text/javascript">
+    $("document").ready(function () {
+        var args = ['dip_temporary_table_10', 'dip_temporary_table_20',
+            'dip_temporary_table_30', 'dip_temporary_table_40',
+            'dip_temporary_table_50', 'dip_temporary_table_100'];
+        $("#tmp_table").typeahead({
+            source:args
+        });
+    });
+
+</script>

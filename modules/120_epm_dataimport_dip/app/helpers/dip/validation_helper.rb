@@ -1,0 +1,2 @@
+module Dip::ValidationHelper
+end

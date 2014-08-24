@@ -1,0 +1,9 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "7%"}) do |data| %>
+        <%= link_to(t(:edit), {:action => "edit", :id => data[:id]}) %>&nbsp;
+        <%= link_to(t(:delete), {:action => "destroy", :id => data[:id]}) %>&nbsp;
+    <% end %>
+    <% builder.column(:name, {:title => t(:name), :searchable => true, :width =>"15%"}) %>
+    <% builder.column(:program, {:title => t(:program), :searchable => true, :width => "30%"}) %>
+    <% builder.column(:description, {:title => t(:description), :searchable => true, :width => "48%"}) %>
+<% end %>

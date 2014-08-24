@@ -1,0 +1,100 @@
+<% if ie6? %>
+    <% require_jscss(:login_ie6) %>
+<% else %>
+    <% require_jscss(:login) %>
+<% end %>
+<body style="height: 100%">
+<table width="100%" height="100%" border="0" align="center" cellpadding="0" cellspacing="0" style="background-image: url('images/ui/login_bg.jpg');background-repeat:no-repeat;background-position: top center; position:relative;">
+  <tbody>
+  <tr>
+    <td align="center" valign="top">
+      <div style="position:absolute; left:0px; top:23px;width: 250px">
+        <img src="images/ui/main-logo.png" style="FILTER: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=images/ui/main_logo.png)" width="100%" height="100%">
+      </div>
+      <div style="position:absolute; right:49px; width:80px;top:44px;">
+        <img src="images/ui/company.png" width="100%" height="100%">
+      </div>
+      <div style="width:609px; height:555px;background-repeat: no-repeat;background-position:center center; margin:0px auto;">
+        <table width="609" style="color: #ffffff" height="242" border="0" cellpadding="0" cellspacing="0">
+          <tbody>
+          <tr>
+            <td align="center" valign="top">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                <tr>
+                  <td height="275">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">
+                    <% if params[:error] %>
+                        <div class="alert alert-error" style="width: 250px;"><%= params[:error] %></div>
+                    <% end %>
+                    <%= form_tag({:action => "login"}, {:nomask => true, :id => "login_form"}) do %>
+                        <table height="97" border="0" cellpadding="0" cellspacing="0">
+                          <tbody>
+                          <tr>
+                            <td nowrap="nowrap" height="42" valign="middle" class="STYLE1"><%= (t :label_irm_common_username) %>
+                              ：
+                            </td>
+                            <td align="left" valign="middle">
+                              <span><%= text_field_tag :username, nil, :class => "txtbox", :id => "userName", :autocomplete => "off", :span => true %></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td height="42" valign="middle">
+                              <span class="STYLE1"><%= (t :label_irm_common_password) %>：</span></td>
+                            <td align="left" valign="middle">
+                              <span><%= password_field_tag :password, nil, :class => "txtbox", :id => "password", :autocomplete => "off", :span => true %></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td align="left" valign="middle">
+                              <div class="rememberme-txt">
+                                <input type="checkbox" name="rememberme" span=true id="rememberchk"><%= t(:remember_user_name) %>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td height="50">&nbsp;</td>
+                            <td align="left" valign="bottom">
+                              <%= link_to t(:label_irm_common_login), {}, :id => "sumbitlogin", :class => "submit btn btn-primary", :style => "margin:4px 9px 5px 0px;" %>
+                              <%= link_to t(:label_irm_common_forgot_password), {:controller => "irm/common", :action => "forgot_password"}, {:class => "forgotpass"} %>
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                    <% end %>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.cookie('navTreeMenu', null, { path: '/' });
+        if ($.cookie("username")) {
+            $("#userName").val($.cookie("username"));
+            $("#rememberchk").attr("checked", true);
+            $("#password").attr("value", "");
+        }
+        $("#login_form").keydown(function (e) {
+            if (e.keyCode == '13') {
+                $("#sumbitlogin").trigger("click");
+            }
+        });
+        $("#rememberchk").change(function (e) {
+            $("#sumbitlogin").focus();
+        });
+    });
+</script>
+</body>

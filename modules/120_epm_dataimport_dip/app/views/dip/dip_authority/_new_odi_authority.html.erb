@@ -1,0 +1,59 @@
+<div class="modal hide" id="new_odi_authority_modal" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <%= t(:label_dip_add_authority) %>
+  </div>
+  <div class="modal-body">
+    <div class="page-block">
+      <table class="page-block-header">
+        <tr>
+          <td class="page-block-title" style="width: 150px">
+            <b><%= t(:cur_label) %> :</b><b id="target_to_add_odi"></b></h2>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-primary" onclick="create_odi_authority(event)" style="text-align: right;"><%= t(:add) %></button>
+          </td>
+          <td class="page-block-help" style="width: 180px">
+            <div id="searchBox4"></div>
+          </td>
+        </tr>
+      </table>
+      <div class="page-block-body">
+        <div class="sub-page-block">
+          <div class="sub-page-block-body">
+            <%= datatable("data_area4", {:action => "get_unauthorized_odi", :controller => "dip/dip_authority"},
+                          [],
+                          {:search_box => "searchBox4", :lazy_load => true, :paginator_box => "paginator4", :scroll => {:mode => "xy", :height => 250}}) %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>
+
+<script type="text/javascript">
+    function create_odi_authority(event) {
+        var checkboxes = $("input[name='valueIds7']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:add_odi_authority,:controller => "dip/dip_authority",:format=>:json})%>",
+                    {valueIds:selectedIds, targetId:$("#cur_target_id").val(), targetType:$("#cur_note_type").val()}, function (result) {
+                        var current_target = $("#odi_table").data("datatable").target;
+                        current_target.loadPage(1);
+                        var current_target1 = $("#data_area4").data("datatable").target;
+                        current_target1.loadPage(1);
+                    })
+        }
+    }
+</script>

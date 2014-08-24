@@ -1,0 +1,55 @@
+<%= common_title %>
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t(:label_ldap_auth_header_list) %></h2>
+      </td>
+      <td class="page-block-button">
+        <%= link_to t(:new), {:action => "new"}, :class => "btn" %>
+      </td>
+      <td class="page-block-help">
+        <div id="ldap_auth_headersSearchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div class="page-block-body">
+    <%= datatable("ldap_auth_headers", {:action => "get_data"}, [], {:search_box => "ldap_auth_headersSearchBox", :paginator_box => "ldap_auth_headersPaginator"}) %>
+  </div>
+</div>
+<%= render "sync" %>
+<script type="text/javascript">
+    function show_sync_wnd(event, id) {
+        var param = {};
+        param["id"] = id;
+        var current_target = $("#data_table2").data("datatable").target;
+        current_target.data.options.defaultOptions = param;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#sync_modal").attr("header_id", id);
+        $("#sync_modal").modal("show");
+    }
+    function sync_user(event) {
+        var checkboxes = $("input[name='valueIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action => "sync",:controller => "irm/ldap_auth_headers"})%>", {
+                user_ids: selectedIds, id: $("#sync_modal").attr("header_id")
+            }, function (result) {
+                    showFadeBackMessage("sync_msg", result.msg);
+            }, "json");
+        }
+
+    }
+</script>
+
+
+

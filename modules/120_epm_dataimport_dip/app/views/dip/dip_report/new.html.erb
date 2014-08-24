@@ -1,0 +1,75 @@
+<%= setting_title %>
+<%= form_for(@report, :url => {:action => "create"}, :builder => CustomFormBuilder) do |f| %>
+    <% content_for :form_block_a do %>
+        <table class="form-table" cellpadding="2px" cellspacing="0" border="0">
+          <tbody>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_name) %></label></td>
+            <td class="data-col"><%= f.text_field :name, :required => true, :id => "name" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_program) %></label></td>
+            <td class="data-col"><%= f.text_area :program, :required => true, :id => "program",:rows=>3 %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_is_pkg) %></label></td>
+            <td class="data-col"><%= f.check_box :is_pkg, :id => "is_pkg" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_db) %></label></td>
+            <td class="data-col"><%= f.select :db_info, Dip::DatabaseInfo.order("db_alias").collect { |c| [c.db_alias, c.id] },{:include_blank=>true}, :style => "min-width:220px" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_columns) %></label></td>
+            <td class="data-col"><%= f.text_area :columns, :id => "columns", :required => true,:rows => 3 %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_columns_desc) %></label></td>
+            <td class="data-col"><%= f.text_area :columns_desc, :required => true, :id => "columns_desc", :rows => 3 %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_dip_report_descs) %></label></td>
+            <td class="data-col"><%= f.text_area :descs,:id => "descs", :rows => 3 %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_parameter_set) %></label></td>
+            <td class="data-col"><%= f.select :parameter_set_id, Dip::ParameterSet.where(:param_type=>Dip::DipConstant::PARAMETER_REPORT).order("name").collect { |c| [c.name, c.id] }, {:include_blank => true}, :style => "min-width:220px" %></td>
+          </tr>
+          <tr>
+            <td class="label-col"><label><%= t(:label_report_category) %></label></td>
+            <td class="data-col"><%= f.select :category_id, Dip::DipCategory.where(:category_type => Dip::DipConstant::CATEGORY_REPORT).order("name").collect { |c| [Dip::DipCategory.get_full_path(c), c.id] },{}, :style => "min-width:220px" %></td>
+          </tr>
+          </tbody>
+        </table>
+    <% end %>
+    <% content_for :form_buttons do %>
+        <%= link_submit t(:save), {:class => "btn btn-primary"} %>
+        <%= link_to t(:back), {:action => "index"}, :class => "btn" %>
+    <% end %>
+    <!--页面结构-->
+    <div class="page-block">
+      <table class="page-block-header">
+        <tr>
+          <td class="page-block-title">
+            <h2 class="block-title"><%= t(:label_new_report) %></h2>
+          </td>
+          <td class="page-block-button">
+            <%= content_for :form_buttons %>
+          </td>
+        </tr>
+      </table>
+      <div class="page-block-body">
+        <%= error_for @report %>
+        <div class="sub-page-block">
+          <div class="sub-page-block-header">
+            <%= form_require_info %>
+            <h3 class="sub-page-block-title"><%= t(:label_common_info) %></h3>
+          </div>
+          <div class="sub-page-block-body">
+            <%= content_for :form_block_a %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+<% end %>

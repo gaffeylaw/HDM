@@ -1,0 +1,4 @@
+$(function(){
+    if($("#<%=params[:result_div] %>"))
+        $("#<%=params[:result_div] %>").html("<%= escape_javascript(@message)%>");
+});

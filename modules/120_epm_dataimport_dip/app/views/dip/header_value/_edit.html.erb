@@ -1,0 +1,30 @@
+<div class="modal hide" id="edit_value_modal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:edit) %></h3>
+  </div>
+  <div class="modal-body">
+    <div id="edit_header_value_msg"></div>
+    <table class="detailList" cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+      <tr>
+        <td class="label-col"><label><%= t(:code) %></label></td>
+        <td class="data-col">
+          <input type="text" id="header_value_code_edit" name="code" readonly="readonly"/>
+        </td>
+      </tr>
+      <tr>
+        <td class="label-col"><label><%= t(:value) %></label></td>
+        <td class="data-col">
+          <input type="text" id="header_value_edit" name="value"/>
+          <input type="hidden" id="header_value_id_edit"/>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" onclick="edit_header_value(event)"><%= t(:save) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+<%= common_title %>
+<b><%= t :cur_label %>：<%= Dip::DipReport.find(params[:id]).name %></b>
+<div class="page-block">
+  <input type="hidden" id="cur_report_id" value="<%= params[:id] %>"/>
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <% parameters=Dip::Parameter.where(:parameter_set_id => Dip::DipReport.find(params[:id]).parameter_set_id).order(:index_no)
+           i=0
+           parameters.each do |h| %>
+            <%= Dip::Header.find(h.header_id).name %>:
+            <%= select :key, i.to_s, Dip::HeaderValue.where(:header_id => h.header_id).order("value").collect { |h| [h.value, h.id] }, {:include_blank => true}, :multiple => false, :style => "margin-bottom: 0px;" %>
+            <% i=i+1 %>
+        <% end %>
+        <button onclick="query_data(event)" class="btn btn-primary"><%= t(:query) %></button>
+        <button onclick="show_export_dialog(event)" class="btn btn-primary"><%= t(:export) %></button>
+        <%= link_to t(:back), {:action => :query, :controller => "dip/dip_report"}, :class => "btn btn-primary" %>
+      </td>
+    </tr>
+  </table>
+  <div class="sub-page-block-body">
+    <%= datatable("data_area", {:action => "get_report_data", :id => params[:id]},
+                  [],
+                  {:search_box => "searchBox", :lazy_load => true, :paginator_box => "paginator", :scroll => {:mode => "xy", :height => 300}}) %>
+  </div>
+</div>
+<%= render "dip/dip_report/select_excel_format" %>
+<script type="text/javascript">
+    function query_data(event) {
+        var values = []
+        var i = 0;
+        while ($("#key_" + i).length != 0) {
+            values.push($("#key_" + i).val() == null ? [""] : $("#key_" + i).val());
+            i++;
+        }
+        var params = {};
+        params['valueIds'] = values;
+        params['reportId'] = $("#cur_report_id").val();
+        var current_target = $("#data_area").data("datatable").target;
+        current_target.data.options.searchOptions = params;
+        current_target.loadPage(1);
+    }
+    function show_export_dialog(event, id) {
+        $("#select_excel_format_modal").modal("show");
+    }
+    function export_data(event) {
+        var type = "xls";
+        if ($("#format_xlsx").attr('checked')) {
+            type = "xlsx"
+        }
+        var values = []
+        var i = 0;
+        while ($("#key_" + i).length != 0) {
+            values.push($("#key_" + i).val() == null ? [""] : $("#key_" + i).val());
+            i++;
+        }
+        $.get("<%= url_for(:action=>"export",:controller => "dip/dip_report",:format=>:json)%>",
+                {reportId:"<%= params[:id]%>", valueIds:values, type:type}, function (result) {
+                    $("#select_excel_format_modal").modal("hide");
+                    location.href = encodeURI("../upload/epm/data/" + result)
+                });
+    }
+</script>

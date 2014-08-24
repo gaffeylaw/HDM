@@ -1,0 +1,12 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "100px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="show_import_dialog(event,'<%= data[:id]%>')"><%= t(:export) %></a>
+        <% if data[:overwritable]||data[:increment_import] %>
+            <%= link_to(t(:import), {:controller => "dip/template", :action => "import", :id => data[:id]}) %>
+        <% end %>
+        <%= link_to(t(:query), {:controller => "dip/template", :action => "query", :id => data[:id]}) %>
+    <% end %>
+    <% builder.column(:name, {:title => t(:label_dip_template_name), :width => "200px", :searchable => true, :sortable => true}) %>
+    <% builder.column(:descs, {:title => t(:descs), :width => "300px",:searchable => true}) %>
+
+<% end %>

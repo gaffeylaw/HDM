@@ -1,0 +1,105 @@
+<%= common_title %>
+<!--页面结构-->
+<div id="dip_authority_index_msg"></div>
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t :cur_label %>
+          ：<span id="cur_org_user_label" style="margin-right: 50px"></span></h2>
+      </td>
+      <td class="page-block-button">
+        <input type="hidden" id="cur_note_type"/>
+        <input type="hidden" id="cur_target_id">
+      </td>
+    </tr>
+  </table>
+
+  <div class="page-block-body" style="width: 100%">
+    <table class="split-table" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+      <tr>
+        <td class="side-bar" style="width:200px">
+          <%= render :partial => "/irm/common/tree_sidebar_template", :locals => {:tree_url => url_for(:controller => "dip/dip_authority", :action => "get_tree_data", :format => :json),
+                                                                                  :tree_id => "tree-div",
+                                                                                  :target_table => "data_table",
+                                                                                  :li_attrs => "name,note_type"} %>
+        </td>
+        <td class="side-content" style="padding-left: 2px;">
+
+          <div class="tabs-container" style="margin-top:0px;">
+            <div class="mx-tabs" id="tabNav">
+              <ul class="clear-fix">
+                <li class="active" id="nav_0"><a href="#tab1" data-toggle="tab"><%= t(:label_value_authority) %></a>
+                </li>
+                <li id="nav_1"><a href="#tab2" data-toggle="tab"><%= t(:label_template_authority) %></a></li>
+                <li id="nav_2"><a href="#tab3" data-toggle="tab"><%= t(:label_report_authority) %></a></li>
+                <li id="nav_3"><a href="#tab4" data-toggle="tab"><%= t(:label_odi_authority) %></a></li>
+                <li id="nav_4"><a href="#tab5" data-toggle="tab"><%= t(:label_infa_authority) %></a></li>
+              </ul>
+            </div>
+            <div class="mx-tab-content" style="overflow: hidden;">
+              <!--Value authority-->
+              <div class="mx-tab-pane active" id="tab1">
+                <%= render "/dip/dip_authority/value_authority" %>
+              </div>
+              <!-- Template authority -->
+              <div class="mx-tab-pane" id="tab2">
+                <%= render "/dip/dip_authority/template_authority" %>
+              </div>
+              <!-- Report authority -->
+              <div class="mx-tab-pane" id="tab3">
+                <%= render "/dip/dip_authority/report_authority" %>
+              </div>
+              <!-- ODI authority -->
+              <div class="mx-tab-pane" id="tab4">
+                <%= render "/dip/dip_authority/odi_authority" %>
+              </div>
+              <div class="mx-tab-pane" id="tab5">
+                <%= render "/dip/dip_authority/infa_authority" %>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+<%= render "/dip/dip_authority/new_value_authority" %>
+<%= render "/dip/dip_authority/new_template_authority" %>
+<%= render "/dip/dip_authority/new_report_authority" %>
+<%= render "/dip/dip_authority/new_odi_authority" %>
+<%= render "/dip/dip_authority/new_infa_authority" %>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#tree-div").bind('nodeListener', function (event, element) {
+            $("#cur_target_id").val(element.attr('id'));
+            $("#cur_org_user_label").text(element.attr('name'));
+            $("#cur_note_type").val(element.attr('note_type'));
+
+            var value_table = $("#value_table").data("datatable").target;
+            var template_table = $("#template_table").data("datatable").target;
+            var report_table = $("#report_table").data("datatable").target;
+            var odi_table=$("#odi_table").data("datatable").target;
+            var infa_table=$("#infa_table").data("datatable").target;
+
+            var params = {};
+            params['targetId'] = element.attr('id');
+            params['targetType'] = element.attr('note_type');
+
+            value_table.data.options.defaultOptions = params;
+            template_table.data.options.defaultOptions = params;
+            report_table.data.options.defaultOptions = params;
+            odi_table.data.options.defaultOptions = params;
+            infa_table.data.options.defaultOptions= params;
+
+            value_table.data.options.searchOptions = {'headerId':$("#header_id").val()};
+            value_table.loadPage(1);
+
+            template_table.loadPage(1);
+            report_table.loadPage(1);
+            odi_table.loadPage(1);
+            infa_table.loadPage(1);
+        });
+//        $("#tree-div").trigger("nodeListener",[$("#<%= Irm::Person.current.id%>")]);
+    });
+</script>

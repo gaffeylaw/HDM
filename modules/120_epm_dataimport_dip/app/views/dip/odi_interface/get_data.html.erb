@@ -1,0 +1,33 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "30px"}) do |data| %>
+        <input type="checkbox" name="valueIds" value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:operation, {:title => t(:operation), :width => "30px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="show_edit_interface(event,'<%=data.to_json%>')"><%= t(:edit) %></a>
+    <% end %>
+    <% builder.column(:interface_code, {:title => t(:label_odi_interface_code), :width => "180px", :searchable => true}) %>
+    <% builder.column(:interface_name, {:title => t(:label_odi_interface_name), :width => "180px", :searchable => true}) %>
+    <% builder.column(:interface_desc, {:title => t(:label_odi_interface_desc), :width => "180px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "180px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "140px"}) %>
+<% end %>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#selectAll").bind("click", function () {
+            if ($("#selectAll")[0].checked) {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = true;
+                }
+            } else {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = false;
+                }
+            }
+        });
+    });
+</script>

@@ -1,0 +1,233 @@
+<!--页面结构-->
+<div class="page-block">
+  <div id="header_value_index_msg"></div>
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title" style="width: 60px">
+        <h2 class="block-title"><%= t(:label_dip_header_value_list) %></h2>
+      </td>
+      <td style="width: 10px">
+        <%= t(:key) %>:&nbsp;
+      </td>
+      <td>
+        <%= select :key, :id, get_header_for_select, {:include_blank => false}, :style => "width:140px" %>
+      </td>
+      <td>
+        <div class="btn-toolbar">
+          <div class="btn-group">
+            <% if allow_to?({:controller => "dip/header", :action => "get_data"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="show_header_info(event)"><%= t(:show_header_info) %></button>
+            <% end %>
+            <% if allow_to?({:controller => "dip/header", :action => "create"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="show_new_header(event)"><%= t(:new_header) %></button>
+            <% end %>
+            <% if allow_to?({:controller => "dip/header", :action => "update"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="show_update_header(event)"><%= t(:edit_header) %></button>
+            <% end %>
+          </div>
+          <div class="btn-group">
+            <% if allow_to?({:controller => "dip/header_value", :action => "create"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="show_add_value(event)"><%= t(:add_value) %></button>
+            <% end %>
+            <% if allow_to?({:controller => "dip/header_value", :action => "enable"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="enable_value(event)"><%= t(:label_dip_enable) %></button>
+            <% end %>
+            <% if allow_to?({:controller => "dip/header_value", :action => "disable"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="disable_value(event)"><%= t(:label_dip_disable) %></button>
+            <% end %>
+          </div>
+        </div>
+      </td>
+      <td class="page-block-help" style="width: 200px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div class="page-block-body">
+    <%= datatable("data_area", {:action => "get_data", :format => "json"},
+                  [],
+                  {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+<%= render "dip/header/form" %>
+<%= render "dip/header/show" %>
+<%= render "dip/header_value/new" %>
+<%= render "dip/header_value/edit" %>
+<script type="text/javascript">
+    function reloadTable() {
+        var params = {};
+        params['header_id'] = $("#key_id").val();
+        var current_target = $("#data_area").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+    }
+    $(document).ready(function () {
+        reloadTable();
+        $("#key_id").bind('change', function (event) {
+            reloadTable();
+        });
+    });
+    function show_update_header(event) {
+        if ($("#key_id").val() && $("#key_id").val().length > 0) {
+            $.get("<%= url_for({:action => "get_header",:controller => "dip/header"})%>", {
+                id: $("#key_id").val()
+            }, function (result) {
+                $("#_header_code").val(result.header.code);
+                $("#_header_name").val(result.header.name);
+                $("#modal_header_wnd").attr("action", "update");
+                $("#modal_header_wnd").attr("header_id", result.header.id);
+                $("#modal_header_wnd").modal("show");
+            }, "json");
+        }
+    }
+    function show_new_header(event) {
+        $("#_header_code").val("");
+        $("#_header_name").val("");
+        $("#modal_header_wnd").attr("action", "create");
+        $("#modal_header_wnd").modal("show");
+    }
+    function save_header(event) {
+        var createUrl = "<%= url_for({:action=>:create,:controller => "dip/header",:format=>:json})%>";
+        var updateUrl = "<%= url_for({:action=>:update,:controller => "dip/header",:format=>:json})%>";
+        var url = null;
+        if ($("#modal_header_wnd").attr("action") == "create") {
+            url = createUrl;
+        }
+        else if ($("#modal_header_wnd").attr("action") == "update") {
+            url = updateUrl;
+        }
+        if (url) {
+            $.post(url, {name: $("#_header_name").val(),
+                        code: $("#_header_code").val(),
+                        id: $("#modal_header_wnd").attr("header_id")},
+                    function (result) {
+                        if (result.success) {
+                            $("#modal_header_wnd").modal("hide");
+                            showFadeBackMessage("header_value_index_msg", result.msg);
+                            update_header_list(result);
+                        }
+                        else {
+                            showFadeBackMessage("header_form_msg", result.msg);
+                        }
+
+                    }, "json");
+        }
+
+    }
+    function update_header_list(result) {
+        var selected = result.selected;
+        var list = result.list;
+        var html = "";
+        for (var i = 0; i < list.length; i++) {
+            html = html + "<option value='" + list[i].header.id + "'>" + list[i].header.name + "</option>";
+        }
+        $("#key_id").html(html);
+        if (selected) {
+            $("#key_id").val(selected);
+        }
+        reloadTable();
+    }
+
+    function show_add_value(event) {
+        var inputs = $("#create_value_modal").find("input[type='text']");
+        for (var m in inputs) {
+            inputs[m].value = "";
+        }
+        $("#header_id_new").val($("#key_id").val());
+        $("#cur_edit_header").text($("#key_id option:selected").text());
+
+        $("#create_value_modal").modal("show");
+    }
+    function show_edit_value(event, id, value, code) {
+        $("#header_value_edit").val(value);
+        $("#header_value_code_edit").val(code);
+        $("#header_value_id_edit").val(id);
+        $("#edit_value_modal").modal("show");
+    }
+    function delete_value(event) {
+        var checkboxes = $("input[name='valueIds']").toArray();
+        var selectedIds = [];
+        var i = 0;
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value;
+                ++i;
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:destroy,:controller => "dip/header_value",:format=>:json})%>", {valueIds: selectedIds}, function (result) {
+                showFadeBackMessage("header_value_index_msg", result.msg);
+                reloadTable();
+            }, "json");
+        }
+    }
+    function enable_value(event) {
+        var checkboxes = $("input[name='valueIds']").toArray();
+        var selectedIds = [];
+        var i = 0;
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value;
+                ++i;
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:enable,:controller => "dip/header_value",:format=>:json})%>", {valueIds: selectedIds}, function (result) {
+                showFadeBackMessage("header_value_index_msg", result.msg);
+                reloadTable();
+            }, "json");
+        }
+    }
+    function show_header_info(event) {
+        $("#show_header_modal").modal("show");
+        var cur_target = $("#data_table").data("datatable").target;
+        cur_target.loadPage(1);
+    }
+    function disable_value(event) {
+        var checkboxes = $("input[name='valueIds']").toArray();
+        var selectedIds = [];
+        var i = 0;
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value;
+                ++i;
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:disable,:controller => "dip/header_value",:format=>:json})%>", {valueIds: selectedIds}, function (result) {
+                showFadeBackMessage("header_value_index_msg", result.msg);
+                reloadTable();
+            }, "json");
+        }
+    }
+    function edit_header_value(event) {
+        var url = "<%= url_for({:action=>:update,:controller => "dip/header_value",:format=>:json})%>";
+        $.post(url, {id: $("#header_value_id_edit").val(), value: $("#header_value_edit").val(), code: $("#header_value_code_edit").val()}, function (result) {
+            if (result.success) {
+                showFadeBackMessage("header_value_index_msg", result.msg);
+                $("#edit_value_modal").modal("hide");
+                reloadTable();
+            }
+            else {
+                showFadeBackMessage("edit_header_value_msg", result.msg);
+            }
+
+        }, "json");
+    }
+    function new_header_value(event) {
+        var url = "<%= url_for({:action=>:create,:controller => "dip/header_value",:format=>:json})%>";
+        var values = [];
+        for (var i = 1; i <= 10; i++) {
+            if ($("#header_value_new" + i).val() != undefined && $.trim($("#header_value_new" + i).val()).length > 0) {
+                values.push({header_id: $("#header_id_new").val(), value: $("#header_value_new" + i).val(), code: $("#header_value_code_new" + i).val(), enabled: $("#enabled_status" + i).val()});
+            }
+        }
+        $.post(url, {values: values}, function (result) {
+            showFadeBackMessage("header_value_index_msg", result.msg);
+            $("#create_value_modal").modal("hide");
+            reloadTable();
+        }, "json");
+    }
+</script>
+

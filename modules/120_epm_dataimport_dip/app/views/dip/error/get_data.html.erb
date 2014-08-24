@@ -1,0 +1,5 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:sheet_name, {:title => t(:sheet_name), :width => "10%",:sortable=>true}) %>
+    <% builder.column(:row_number, {:title => t(:row_number), :width => "5%",:sortable=>true}) %>
+    <% builder.column(:message, {:title => t(:error_message), :width => "80%",:sortable=>true}) %>
+<% end %>

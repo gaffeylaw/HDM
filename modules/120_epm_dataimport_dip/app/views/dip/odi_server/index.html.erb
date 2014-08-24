@@ -1,0 +1,95 @@
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title" style="width: 180px">
+        <h2 class="block-title"><%= t(:label_odi_server_list) %></h2>
+      </td>
+      <td>
+        <button class="btn btn-primary" data-toggle="button" onclick="show_add_server(event)"><%= t(:label_new_server) %></button>
+        <button class="btn btn-primary" data-toggle="button" onclick="delete_server(event)"><%= t(:label_delete_server) %></button>
+        <%= link_to t(:back), {:action => :index, :controller => "dip/odi_interface"}, :class => "btn btn-primary" %>
+      </td>
+      <td class="page-block-help" style="width: 250px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div class="page-block-body">
+    <%= datatable("data_table", {:action => "get_data", :format => "json"},
+                  [],
+                  {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+    <div id="paginator"></div>
+  </div>
+</div>
+<%= render "dip/odi_server/edit" %>
+<%= render "dip/odi_server/new" %>
+
+<script type="text/javascript">
+    function show_add_server(event) {
+        var inputs=$("#new_modal").find("input[type='text']");
+        for(var m in inputs){
+            inputs[m].value="";
+        }
+        $("#new_modal").modal("show")
+    }
+    function add_server(event) {
+        $.post("<%= url_for({:action=>:create,:controller => "dip/odi_server",:format=>:json})%>", {server_name:$("#server_name_new").val(),
+            server_desc:$("#server_desc_new").val(),
+            url:$("#url_new").val(),
+            workspace:$("#workspace_new").val(),
+            odi_user:$("#odi_user_new").val(),
+            odi_pwd:$("#odi_pwd_new").val()}, function (result) {
+            $("#new_modal").modal("hide")
+            var current_target = $("#data_table").data("datatable").target;
+            current_target.loadPage(1);
+        }, "json");
+    }
+    function show_edit_server(event, id) {
+        $.get("<%= url_for({:action=>:get_edit_data,:controller => "dip/odi_server",:format=>:json})%>", {id:id}, function (result) {
+            $("#server_name_edit").val(result.odi_server.server_name);
+            $("#server_desc_edit").val(result.odi_server.server_desc);
+            $("#url_edit").val(result.odi_server.url);
+            $("#workspace_edit").val(result.odi_server.workspace);
+            $("#odi_user_edit").val(result.odi_server.odi_user);
+            $("#odi_pwd_edit").val(result.odi_server.odi_pwd);
+            $("#id_edit").val(result.odi_server.id);
+            $("#edit_modal").modal("show");
+        }, "json");
+
+    }
+    function edit_server(event) {
+        $.post("<%= url_for({:action=>:update,:controller => "dip/odi_server",:format=>:json})%>", {server_name:$("#server_name_edit").val(),
+                    server_desc:$("#server_desc_edit").val(),
+                    url:$("#url_edit").val(),
+                    workspace:$("#workspace_edit").val(),
+                    odi_user:$("#odi_user_edit").val(),
+                    odi_pwd:$("#odi_pwd_edit").val(),
+                    id:$("#id_edit").val()}, function (result) {
+                    $("#edit_modal").modal("hide")
+                    var current_target = $("#data_table").data("datatable").target;
+                    current_target.loadPage(1);
+                }, "json"
+        )
+        ;
+
+    }
+    function delete_server(event) {
+        var checkboxes = $("input[name='valueIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:destroy,:controller => "dip/odi_server",:format=>:json})%>", {valueIds:selectedIds}, function (result) {
+                var current_target = $("#data_table").data("datatable").target;
+                current_target.loadPage(1);
+            })
+        }
+    }
+</script>
+

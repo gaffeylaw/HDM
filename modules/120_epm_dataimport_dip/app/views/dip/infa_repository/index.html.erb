@@ -1,0 +1,59 @@
+<%= common_title %>
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t(:label_infa_repository) %></h2>
+      </td>
+      <td class="page-block-button">
+        <button class="btn btn-primary" onclick="show_new_wnd(event)"><%= t(:new) %></button>
+        <%= link_to t(:back), {:action => "index", :controller => "dip/infa_workflow"}, :class => "btn btn-primary" %>
+      </td>
+      <td class="page-block-help" style="width: 250px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div id="infa_repository_msg"></div>
+  <div class="page-block-body" style="width: 100%">
+    <%= datatable("data_table", {:action => "get_data", :controller => "dip/infa_repository"}, [],
+                  {:search_box => "searchBox", :style => "margin-left:2px", :paginator_box => "paginatorBox", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+<%= render "dip/infa_repository/edit" %>
+<%= render "dip/infa_repository/new" %>
+<script type="text/javascript">
+    function show_new_wnd(event) {
+        $("#create_infa_repository_modal").modal("show");
+    }
+    function edit_repository(event, id) {
+        $.post("<%= url_for({:action=>:get_repository_info,:controller=>"dip/infa_repository",:format=>:json})%>", {id:id}, function (result) {
+            var repository = result.infa_repository;
+            $("#edit_repository_service_url").val(repository.service_url);
+            $("#edit_repository_domain_name").val(repository.repository_domain_name);
+            $("#edit_repository_name").val(repository.repository_name);
+            $("#edit_repository_alias").val(repository.repository_alias);
+            $("#edit_repository_user_name").val(repository.user_name);
+            $("#edit_repository_password").val(repository.password);
+            $("#edit_repository_user_namespace").val(repository.user_namespace);
+            $("#cur_repository_id").val(repository.id);
+            $("#edit_infa_repository_modal").modal("show");
+        }, "json");
+    }
+    function delete_repository(event, id) {
+        $.post("<%= url_for({:action=>:destroy,:controller=>'dip/infa_repository',:format=>:json})%>", {
+            id:id
+        }, function (result) {
+            var current_target = $("#data_table").data("datatable").target;
+            current_target.load();
+        }, "json");
+    }
+    function synch_workflow(event, id) {
+        $.post("<%= url_for({:action=>:synch,:controller=>'dip/infa_repository',:format=>:json})%>", {
+            id:id
+        }, function (result) {
+            showFadeBackMessage("infa_repository_msg", result.msg);
+        }, "json");
+    }
+</script>

@@ -1,0 +1,3 @@
+module Dip::ErrorHelper
+
+end

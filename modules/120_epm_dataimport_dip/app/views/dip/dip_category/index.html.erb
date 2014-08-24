@@ -1,0 +1,87 @@
+<!--页面结构-->
+<div id="dip_category_index_msg"></div>
+<div class="page-block">
+  <div class="page-block-body" style="width: 100%">
+    <table class="split-table" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+      <tr>
+        <td class="side-bar">
+          <%= render :partial => "/irm/common/tree_sidebar_template", :locals => {:tree_url => url_for(:controller => "dip/dip_category", :action => "get_type_tree_data", :format => :json),
+                                                                                  :tree_id => "tree-div",
+                                                                                  :li_attrs => "id,text,category_type,parent_name"} %>
+        </td>
+        <td class="side-content" style="padding-left: 2px">
+          <table class="detail-list" cellpadding="0" cellspacing="0" border="0" style="margin-top: 20px">
+            <tbody>
+            <tr>
+              <td class="label-col"><label><%= t(:parent_category) %></label></td>
+              <td class="data-col"><%= text_field :category, :parent, :required => true, :style => "width:300px", :readonly => 'readonly' %></td>
+            </tr>
+            <tr>
+              <td class="label-col"><label><%= t(:name) %></label></td>
+              <td class="data-col"><%= text_field :category, :name, :required => true, :style => "width:300px" %></td>
+            </tr>
+            <tr>
+              <td class="label-col"></td>
+              <td class="data-col">
+                <button class="btn btn-primary" onclick="show_new_wnd(event)"><%= t(:new_sub_category) %></button>
+                <button class="btn btn-primary" onclick="update_category(event)"><%= t(:change) %></button>
+                <button class="btn btn-primary" onclick="delete_category(event)"><%= t(:delete) %></button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+<%= render "dip/dip_category/new_category" %>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#tree-div").bind('nodeListener', function (event, element) {
+            $("#category_parent").val(element.attr("parent_name"));
+            $("#category_name").val(element.attr("text"));
+            $("#category_name").attr("category_id", element.attr("id") || null);
+            $("#category_name").attr("category_name", element.attr("text"));
+            $("#category_name").attr("category_type", element.attr("category_type"));
+        });
+    });
+    function show_new_wnd(event) {
+        if ($("#category_name").attr("category_type")) {
+            $("#_category_parent").val($("#category_name").attr("category_name"));
+            $("#modal_wnd").modal("show");
+        } else {
+            showFadeBackMessage("dip_category_index_msg", ["<%= t(:select_parent_category)%>"]);
+        }
+    }
+    function update_category(event) {
+        if ($("#category_name").attr("category_id") && $("#category_name").attr("category_name") != $("#category_name").val()) {
+            $.post("<%= url_for({:action =>:update,:controller => "dip/dip_category",:format=>:json})%>",
+                    {   name: $("#category_name").val(),
+                        id: $("#category_name").attr("category_id")},
+                    function (result) {
+                        showFadeBackMessage("dip_category_index_msg", result.msg);
+                        if (result.success) {
+                            $("#tree-div").empty();
+                            init_tree();
+                        }
+                    }, "json");
+        } else {
+            showFadeBackMessage("dip_category_index_msg", ["<%= t(:label_nothing_to_change)%>"]);
+        }
+    }
+    function delete_category(event) {
+        if ($("#category_name").attr("category_id")) {
+            $.get("<%= url_for({:action=>:destroy,:controller => "dip/dip_category",:format=>:json})%>",
+                    {category_id: $("#category_name").attr("category_id")},
+                    function (result) {
+                        showFadeBackMessage("dip_category_index_msg", result.msg);
+                        $("#tree-div").empty();
+                        init_tree();
+                    }, "json");
+        }
+        else {
+            showFadeBackMessage("dip_category_index_msg", ["<%= t(:label_nothing_to_delete)%>"]);
+        }
+    }
+</script>

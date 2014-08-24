@@ -1,0 +1,18 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "120px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="edit_repository(event,'<%=data[:id]%>')"><%= t(:edit) %></a>
+        <a href="javascript:void(0)" onclick="delete_repository(event,'<%=data[:id]%>')"><%= t(:delete) %></a>
+        <a href="javascript:void(0)" onclick="synch_workflow(event,'<%=data[:id]%>')"><%= t(:synchronous) %></a>
+        <%= link_to(t(:label_infa_workflow), {:controller => "dip/infa_workflow", :action => "index", :id => data[:id]}) %>
+    <% end %>
+    <% builder.column(:service_url, {:title => t(:label_infa_repository_service_url), :width => "180px"}) %>
+    <% builder.column(:repository_domain_name, {:title => t(:label_infa_repository_domain_name), :width => "180px"}) %>
+    <% builder.column(:repository_name, {:title => t(:label_infa_repository_name), :width => "180px",:searchable=>true}) %>
+    <% builder.column(:repository_alias, {:title => t(:label_infa_repository_alias), :width => "180px",:searchable=>true})%>
+    <% builder.column(:user_name, {:title => t(:label_infa_user_name), :width => "180px"}) %>
+    <% builder.column(:user_namespace, {:title => t(:lable_infa_user_namespace), :width => "180px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "140px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "140px"}) %>
+<% end %>

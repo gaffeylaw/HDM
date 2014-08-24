@@ -1,0 +1,17 @@
+<div class="modal hide" id="select_workflow_modal" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:label_select_workflow) %></h3>
+  </div>
+  <div class="modal-body">
+    <div class="page-block-body">
+      <%= datatable("data_table2", {:action => "get_authorized_workflow", :format => "json"},
+                    [],
+                    {:search_box => "searchBox2",:paginator_box => "paginator2",:scroll => {:mode => "xy", :height => 250}}) %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button onclick="show_select_params(event)" class="btn btn-primary"><%= t(:next) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

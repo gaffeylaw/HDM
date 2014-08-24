@@ -1,0 +1,55 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:checkbox, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "30px"}) do |data| %>
+        <input type="checkbox" name="columnIds" value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:id, {:title => t(:operation), :width => "80px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="edit_column(event,'<%=data[:id]%>')"><%= t(:edit) %></a>
+        <a href="javascript:void(0)" onclick="showValidationManage(event,'<%=data[:id]%>')"><%= t(:label_template_validation_manage) %></a>
+    <% end %>
+    <% builder.column(:name, {:title => t(:label_dip_template_column_name), :width => "180px"}) %>
+    <% builder.column(:column_name, {:title => t(:label_dip_column_name), :width => "140px"}) %>
+    <% builder.column(:view_column, {:title => t(:label_dip_view_column), :width => "140px"}) %>
+    <% builder.column(:column_length, {:title => t(:label_dip_column_length), :width => "30px"}) do |data| %>
+		<%= data[:column_length].to_i%>
+	<% end %>	
+    
+    <% builder.column(:is_pk, {:title => t(:label_dip_column_is_pk), :width => "30px"}) do |data| %>
+        <%= t("label_#{data[:is_pk].to_s}") %>
+    <% end %>
+    <% builder.column(:editable, {:title => t(:label_editable), :width => "30px"}) do |data| %>
+        <%= t("label_#{data[:editable].to_s}") %>
+    <% end %>
+    <% builder.column(:mapped, {:title => t(:label_dip_column_mapped), :width => "30px"}) do |data| %>
+        <%= t("label_#{data[:mapped].to_s}") %>
+    <% end %>
+    <% builder.column(:omitted, {:title => t(:label_dip_column_omitted), :width => "30px"}) do |data| %>
+        <%= t("label_#{data[:omitted].to_s}") %>
+    <% end %>
+    <% builder.column(:data_type, {:title => t(:label_dip_column_data_type), :width => "80px"})%>
+    <% builder.column(:validations, {:title => t(:label_dip_validations), :width => "400px"}) do |data| %>
+        <%= getValidations(data.id) %>
+    <% end %>
+    <% builder.column(:value_list, {:title => t(:label_value_list_program), :width => "240px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "100px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "120px"}) %>
+
+<% end %>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#selectAll").bind("click", function () {
+            if ($("#selectAll")[0].checked) {
+                var checkboxes = $("input[name='columnIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = true;
+                }
+            } else {
+                var checkboxes = $("input[name='columnIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = false;
+                }
+            }
+        });
+    });
+</script>

@@ -1,0 +1,61 @@
+<%= common_title %>
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title">
+        <h2 class="block-title"><%= t(:label_dip_template_category) %></h2>
+      </td>
+      <td class="page-block-help">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="page-block-body">
+    <table class="split-table" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="side-bar">
+          <%= render :partial => "/irm/common/tree_sidebar_template", :locals => {:tree_url => url_for(:controller => "dip/dip_category", :action => "get_tree_data",:category_type=>Dip::DipConstant::CATEGORY_TEMPLATE, :format => :json),
+                                                                                  :tree_id => "tree-div",
+                                                                                  :target_table => "template_table",
+                                                                                  :li_attrs => "id"} %>
+        </td>
+        <td class="side-content" style="padding-left: 2px">
+          <%= datatable("template_table", {:action => "get_data_authorized", :controller => "dip/template"}, [], {:search_box => "searchBox", :paginator_box => "paginatorBox", :scroll => {:mode => "xy"}}) %>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+<%= render "dip/template/select_excel_format" %>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#tree-div").bind('nodeListener', function (event, element) {
+            var params = {};
+            params['category_id'] = element.attr('id');
+            var current_target = $("#template_table").data("datatable").target;
+            current_target.data.options.defaultOptions = params;
+            current_target.data.options.searchOptions = {};
+            current_target.loadPage(1);
+        });
+    });
+    function show_import_dialog(event, id) {
+        $("#cur_template_id").val(id);
+        $("#select_excel_format_modal").modal("show");
+    }
+    function export_data(event) {
+        var type = "xls";
+        if ($("#format_xlsx").attr('checked')) {
+            type = "xlsx"
+        }
+        $.get("<%= url_for({:action=>:export,:controller => "dip/template",:format=>:json})%>", {
+                    id:$("#cur_template_id").val(), type:type
+                },
+                function (result) {
+                    $("#select_excel_format_modal").modal("hide");
+                    location.href = encodeURI("./upload/epm/model/" + result);
+                }, "json");
+    }
+</script>

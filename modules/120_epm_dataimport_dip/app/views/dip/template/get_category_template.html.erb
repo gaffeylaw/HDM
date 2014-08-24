@@ -1,0 +1,25 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "80px"}) do |data| %>
+        <%= link_to(t(:edit), {:controller => "dip/template", :action => "edit", :id => data[:id]}) %>&nbsp;
+        <%= link_to(t(:delete), {:controller => "dip/template", :action => "destroy", :id => data[:id]}) %>&nbsp;
+    <% end %>
+    <% builder.column(:name, {:title => t(:label_dip_template_name), :width => "180px", :searchable => true, :sortable => true}) %>
+    <% builder.column(:code, {:title => t(:code), :width => "180px", :searchable => true, :sortable => true}) %>
+    <% builder.column(:descs, {:title => t(:descs), :width => "180px", :searchable => true}) %>
+    <% builder.column(:table_name, {:title => t(:label_dip_actual_table), :width => "180px"}) %>
+    <% builder.column(:temporary_table, {:title => t(:label_dip_tmp_table), :width => "180px"}) %>
+    <% builder.column(:query_view, {:title => t(:label_dip_query_view), :width => "180px"}) %>
+    <% builder.column(:overwritable, {:title => t(:label_dip_template_overwritable), :width => "180px"}) do |data|%>
+        <%= data[:overwritable]%>
+    <%end%>
+    <% builder.column(:template_category_id, {:title => t(:label_dip_template_category), :width => "180px"}) do |data| %>
+        <%= data[:template_category_id].nil? ? "" : ((cat=Dip::DipCategory.where(:id => data[:template_category_id]).first).nil? ? "" : cat.name) %>
+    <% end %>
+    <% builder.column(:combination_id, {:title => t(:label_dip_combination), :width => "180px"}) do |data| %>
+        <%= data[:combination_id].nil? ? "" : ((com=Dip::Combination.where(:id => data[:combination_id]).first).nil? ? "" : com.name) %>
+    <% end %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "180px", :sortable => true}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "180px", :sortable => true}) %>
+<% end %>

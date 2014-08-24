@@ -1,0 +1,47 @@
+<div class="modal hide" id="edit_template_validation_modal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:edit) %></h3>
+  </div>
+  <div class="modal-body">
+    <div id="edit_template_validation_msg"></div>
+    <table class="detailList" cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+      <tr>
+        <td class="label-col"><label><%= t(:args) %></label></td>
+        <td class="data-col">
+          <input type="text" id="template_validate_args_edit" style="width: 300px;"/>
+          <input type="hidden" id="template_validate_id_edit"/>
+        </td>
+      </tr>
+      <tr>
+        <td class="label-col"><label><%= t(:label_index_no) %></label></td>
+        <td class="data-col">
+          <input type="text" id="template_validate_index_no_edit" style="width: 300px;"/>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" onclick="edit_template_validate(event)"><%= t(:save) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>
+<script>
+    function edit_template_validate(event) {
+        $.post("<%= url_for({:action=>:update,:controller => "dip/template_validation",:format=>:json})%>", {
+            id:$("#template_validate_id_edit").val(), args:$("#template_validate_args_edit").val(),
+            index_no:$("#template_validate_index_no_edit").val()
+        }, function (result) {
+            if (result.success) {
+                $("#edit_template_validation_modal").modal("hide");
+                var current_target = $("#lookup_type").data("datatable").target;
+                current_target.loadPage(1);
+                showFadeBackMessage("edit_template_msg", result.msg);
+            } else {
+                showFadeBackMessage("edit_template_validation_msg", result.msg);
+            }
+        }, "json");
+    }
+</script>

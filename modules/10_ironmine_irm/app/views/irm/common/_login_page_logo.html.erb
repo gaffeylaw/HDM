@@ -1,0 +1,16 @@
+<a id="main-logo"></a>
+<style type="text/css">
+#main-logo {
+    background:url('<%= Irm::SystemParametersManager.login_page_logo%>') no-repeat scroll left top transparent;
+    display:block;
+    height:124px;
+    margin:4px 0 0 16px;
+    overflow:hidden;
+    position:absolute;
+    width:300px;
+    z-index:10;
+    /*运用滤镜解决IE6下png不透明*/
+    _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='<%= Irm::SystemParametersManager.login_page_logo%>');
+    _background: none;
+}
+</style>

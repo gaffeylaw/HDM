@@ -1,0 +1,21 @@
+<div class="modal hide" id="show_header_modal" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:label_dip_header_list) %></h3>
+  </div>
+  <div class="modal-body">
+    <div class="page-block">
+      <div class="page-block-body">
+        <%= datatable("data_table", {:action => "get_data", :format => "json", :controller => "dip/header"},
+                      [],
+                      {:search_box => "searchBox1", :paginator_box => "paginator1", :scroll => {:mode => "y"},:style=>"height:350px"}) %>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>                  
+
+

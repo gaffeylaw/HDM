@@ -1,0 +1,40 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "100px"}) do |data| %>
+        <a onclick="edit_validation(event,'<%= data.id%>')" href="javascript:void(0)"><%= t(:edit) %></a>&nbsp;&nbsp;
+        <a onclick="delete_validation(event,'<%= data.id%>')" href="javascript:void(0)"><%= t(:delete) %></a>
+    <% end %>
+    <% builder.column(:name, {:title => t(:name), :width => "150px"}) do |data| %>
+        <%= getValidationName(data.validation_id) %>
+    <% end %>
+    <% builder.column(:args, {:title => t(:args), :width => "180px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "140px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "180px"}) %>
+<% end %>
+<script>
+    function edit_validation(event, id) {
+        $("#template_validate_id_edit").val(id);
+        $.get("<%= url_for(:action=>:edit,:controller => "dip/template_validation",:format=>"json")%>", {validationId: id}, function (result) {
+            $("#index_template_validation_modal").modal("hide");
+            $("#template_validate_args_edit").val(result.template_validation.args);
+            $("#template_validate_index_no_edit").val(result.template_validation.index_no);
+            $("#edit_template_validation_modal").modal("show");
+        }, "json");
+    }
+    function delete_validation(event, id) {
+        $.post("<%= url_for({:action=>:destroy,:controller => "dip/template_validation"})%>", {
+            id: id
+        }, function (result) {
+            if (result.success) {
+                $("#index_template_validation_modal").modal("hide");
+                var current_target = $("#lookup_type").data("datatable").target;
+                current_target.loadPage(1);
+                showFadeBackMessage("edit_template_msg", result.msg);
+            }
+            else {
+                showFadeBackMessage("edit_template_validation_msg", result.msg)
+            }
+        }, "json");
+    }
+</script>

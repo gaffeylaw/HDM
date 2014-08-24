@@ -1,0 +1,22 @@
+<%= datatable_view({:count => @count5, :datas => @datas5}) do |builder| %>
+    <% builder.column(:interface_id, {:title => t(:label_dip_odi_interface_name), :width => "250px"}) do |data| %>
+        <%= Dip::OdiInterface.find(data.interface_id).interface_name %>
+    <% end %>
+    <% builder.column(:session_id, {:title => t(:label_session_id), :width => "60px",:sortable => true}) do |data| %>
+        <%= data.session_id %>
+    <% end %>
+    <% builder.column(:status, {:title => t(:label_interface_status), :width => "60px",:sortable => true})do |data| %>
+        <label style="background-color: <%= getodiColor(data[:status]) %>"><%= get_status(data.id, data.interface_id, data.session_id) %></label>
+    <% end %>
+    <% builder.column(:showErrors,{:title => t(:showErrors), :width => "50px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="alert('<%=get_log(data.id)%>')"><%= t(:show) %></a>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "120px",:sortable => true})%>
+    <% builder.column(:out, {:title => t(:label_dip_odi_out), :width => "100px"}) do |data| %>
+        <% if file_exist(data.id,data.session_id) %>
+             <a href=../upload/data/<%= data.session_id %>.zip><%=data.session_id %>.zip</a>
+         <% else %>
+             <%= "" %>
+        <% end %>
+    <% end %>
+<% end %>

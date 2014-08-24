@@ -1,0 +1,11 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:checkbox, {:title => " ", :width => "20px"}) do |data| %>
+        <input type="checkbox" name="columnIds1" <%= data[:parameter_set_id] ? "checked='checked'" : "" %> value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:name_alias, {:title => t(:label_alias), :width => "160px"}) %>
+    <% builder.column(:name, {:title => t(:name), :width => "160px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "100px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "120px"}) %>
+<% end %>

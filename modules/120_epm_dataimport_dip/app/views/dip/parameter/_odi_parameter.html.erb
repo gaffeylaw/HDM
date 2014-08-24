@@ -1,0 +1,97 @@
+<div class="modal hide" id="odi_parameter_wnd" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body">
+    <div id="odi_parameter_wnd_msg"></div>
+    <!--页面结构-->
+    <div class="page-block">
+      <table class="page-block-header">
+        <tr>
+          <td class="page-block-title">
+            <h2 class="block-title"><%= t(:label_dip_parameter) %></h2>
+          </td>
+          <td class="page-block-button">
+            <button class="btn btn-primary" onclick="new_parameter_wnd(event)"><%= t(:new) %></button>
+            <button class="btn btn-primary" onclick="delete_parameter(event)"><%= t(:delete) %></button>
+          </td>
+        </tr>
+      </table>
+      <div class="page-block-body" style="width: 100%">
+        <%= datatable("data_table2", {:action => "get_odi_parameter", :controller => "dip/parameter", :param_type => params[:param_type], :parameter_set_id => params[:id]}, [],
+                      {:search_box => "searchBox2", :style => "margin-left:2px", :paginator_box => "paginatorBox2", :scroll => {:mode => "xy", :height => 300}}) %>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" id="save_header" onclick="save_change(event)"><%= t(:save) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>
+<script type="text/javascript">
+    function new_parameter_wnd(event) {
+        $("#odi_parameter_form_wnd").attr("action", "create");
+        $("#odi_parameter_form_wnd").attr("parameter_id", null);
+        $("#odi_parameter_form_wnd_form")[0].reset();
+        $("#odi_parameter_form_wnd").modal("show");
+    }
+    function delete_parameter(event) {
+        var checkboxes = $("input[name='columnIds']").toArray()
+        var selectedIds = []
+        var i = 0
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                selectedIds[i] = checkboxes[checkbox].value
+                ++i
+            }
+        }
+        if (selectedIds.length > 0) {
+            $.post("<%= url_for({:action=>:destroy,:controller => "dip/parameter",:format=>:json})%>",
+                    {valueIds: selectedIds}, function (result) {
+                        showFadeBackMessage("odi_parameter_wnd_msg", result.msg);
+                        var current_target = $("#data_table2").data("datatable").target;
+                        current_target.load();
+                    }, "json");
+        }
+    }
+    function edit_odi_parameter(event, data) {
+        var parameter = JSON.parse(data)["parameter"];
+        $("#odi_parameter_form_wnd").attr("parameter_id", parameter["id"]);
+        $("#_parameter_index_no").val(parameter["index_no"]);
+        $("#_parameter_name").val(parameter["name"]);
+        $("#_parameter_name_alias").val(parameter["name_alias"]);
+        $("#_parameter_header_id").val(parameter["header_id"]);
+        $("#odi_parameter_form_wnd").attr("action", "update");
+        $("#odi_parameter_form_wnd").modal("show");
+    }
+    function save_odi_parameter(event) {
+        var url = null;
+        if ($("#odi_parameter_form_wnd").attr("action") == "create") {
+            url = '<%= url_for({:action => "create",:controller => "dip/parameter"})%>';
+        } else if ($("#odi_parameter_form_wnd").attr("action") == "update") {
+            url = '<%= url_for({:action => "update",:controller => "dip/parameter"})%>';
+        }
+        if (url) {
+            $.post(url, {
+                param_type: '<%= Dip::DipConstant::PARAMETER_ODI%>',
+                index_no: $("#_parameter_index_no").val(),
+                name: $("#_parameter_name").val(),
+                name_alias: $("#_parameter_name_alias").val(),
+                header_id: $("#_parameter_header_id").val(),
+                id: $("#odi_parameter_form_wnd").attr("parameter_id")
+            }, function (result) {
+                if (result.success) {
+                    $("#odi_parameter_form_wnd").modal("hide");
+                    showFadeBackMessage("odi_parameter_wnd_msg", result.msg);
+                    var current_target = $("#data_table2").data("datatable").target;
+                    current_target.loadPage(1);
+                }
+                else {
+                    showFadeBackMessage("odi_parameter_form_wnd_msg", result.msg);
+                }
+            }, "json");
+        }
+    }
+</script>
+
+

@@ -1,0 +1,19 @@
+<div class="modal hide" id="select_param_modal" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:label_select_params) %></h3>
+  </div>
+  <div class="modal-body">
+    <div id="run_interface_msg"></div>
+    <div class="page-block-body">
+      <%= datatable("data_table1", {:action => "get_param", :format => "json"},
+                    [],
+                    {:search_box => "searchBox1", :paginator_box => "paginator1", :scroll => {:mode => "xy", :height => 250}}) %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button onclick="on_previous(event)" class="btn btn-primary"><%= t(:back) %></button>
+    <button onclick="run_interface(event)" class="btn btn-primary"><%= t(:label_run) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

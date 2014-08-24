@@ -1,0 +1,12 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "120px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="edit_parameter_set(event,'<%=data[:id]%>','<%= data[:name]%>')"><%= t(:edit) %></a>
+        <a href="javascript:void(0)" onclick="delete_parameter_set(event,'<%=data[:id]%>')"><%= t(:delete) %></a>
+        <a href="javascript:void(0)" onclick="select_parameter(event,'<%=data[:id]%>')"><%= t(:label_select_parameter) %></a>
+    <% end %>
+    <% builder.column(:name, {:title => t(:name), :width => "180px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "140px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "140px"}) %>
+<% end %>

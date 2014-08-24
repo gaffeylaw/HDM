@@ -1,0 +1,92 @@
+<style>
+.kanban_body > table{width:100%;}
+.card-div > table{width:80%;height:76px;table-layout:fixed;overflow:hidden;}
+.card-div{height:76px;overflow:hidden;}
+.kanban_body .card{
+    background-color:#f5f2bc;
+    margin:5px;
+    height:90px;
+    /*width: 100%;*/
+    border: 1px solid #808080;
+
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+
+    position:relative;
+
+    -moz-box-shadow: 0 2px 4px rgba(127, 127, 127, 0.6);
+    -webkit-box-shadow:rgba(127, 127, 127, 0.6) 0 2px 4px;
+    box-shadow: 0 2px 4px rgba(127, 127, 127, 0.6);
+
+    overflow:hidden;
+}
+.kanban_body .card-title{white-space:nowrap;text-align:left;font-weight:bold;font-size:14px;height:15px;overflow:hidden;text-overflow:ellipsis;}
+.kanban_body .card-content{font-size:12px;overflow:hidden;text-overflow:ellipsis;}
+.kanban_body .card-date{bottom:0;right:5px;position:absolute;color:#a0a0a0;}
+
+.kanban_body .td_l, .kanban_body .td_c, .kanban_body .td_r{height:180px;}
+.kanban_body .td_l{border-right: 1px solid #5bade9;}
+.kanban_body .td_r{border-left: 1px solid #5bade9;}
+.kanban_body .td_c{border-right: 1px solid #5bade9;border-left: 1px solid #5bade9;}
+
+.kanban_body .th_l, .kanban_body .th_c, .kanban_body .th_r{
+    height: 30px;
+    font-size: 18px;
+    vertical-align: middle;
+    font-weight: bold;
+    color: #ffffff;
+    background-color:#2191c0;
+}
+.kanban_body .th_l{border-right: 1px solid #ffffff;}
+.kanban_body .th_r{border-left: 1px solid #ffffff;}
+.kanban_body .th_c{border-right: 1px solid #ffffff;border-left: 1px solid #ffffff;}
+</style>
+<% if kanban %>
+    <div id="kanban_<%= position_code%>">
+        <%= show_kanban(Irm::Person.current.profile.id, position_code)%>
+    </div>
+    <script type="text/javascript">
+      $(function(){
+          var refresh_mode = 0;
+          var iId, timeOften = parseInt($("#refreshOften").val()) * 1000;
+          function refresh_kanban(){
+              var mode = refresh_mode;
+              var uri = "/kanbans/<%= position_code%>/refresh_my_kanban/" + mode+"?_dom_id=kanban_<%= position_code%>";
+              $("#kanban_<%= position_code%>").load(uri, function() {
+                  $("div.card").popover({"trigger":"hover","placement":"right"});
+              });
+
+          }
+          $("#refreshBtn").click(function(e){
+              set_mode(refresh_mode);
+          });
+          //当页面设置了自定义刷新时间后
+          $("#refreshOften").change(function(){
+              clearInterval(iId);
+              timeOften = parseInt($(this).val()) * 1000;
+              if(timeOften > 0){
+                  iId = setInterval(refresh_kanban, timeOften);
+              }else{
+                  iId = null;
+              }
+
+          });
+          function set_mode(mode){
+              clearInterval(iId);
+              refresh_mode = mode;
+              refresh_kanban();
+              if(timeOften > 0){
+                iId = setInterval(refresh_kanban, timeOften);
+              }
+          }
+          if(timeOften > 0){
+            iId = setInterval(refresh_kanban, timeOften);
+          }
+          $("div.card").popover({"trigger":"hover","placement":"right"});
+
+      });
+    </script>
+<% end %>

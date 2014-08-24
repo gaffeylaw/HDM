@@ -1,0 +1,2 @@
+module Dip::TemporaryTableHelper
+end

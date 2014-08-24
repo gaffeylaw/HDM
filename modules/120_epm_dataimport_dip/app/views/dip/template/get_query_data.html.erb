@@ -1,0 +1,38 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% @template_column.each do |v| %>
+        <% builder.column(v.view_column.to_s.downcase, {:title => v.name, :width => (v.column_length).to_i.to_s, :sortable => true, :searchable => true}) do |data| %>
+            <label row_id="<%= data[:row_id] %>" style="display: block;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>                    <label data_id="<%= data[:row_id] %>"
+                           name="<%= v.view_column.to_s.downcase %>"
+                           combination_record="<%= data.combination_record %>"
+                           value="<%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %>"
+                           style="display: none;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>
+        <% end %>
+    <% end %>
+    <% ['updated_at', 'updated_by', 'created_at', 'created_by'].each do |h| %>
+        <% builder.column(h, {:title => t(h), :width => "120px"}) do |data| %>
+            <%= column_format(h, data[h]) %>
+        <% end %>
+    <% end %>
+    <% @headers.each do |h| %>
+        <% builder.column("dip"+h.header_id.to_s.downcase, {:title => Dip::Header.find(h.header_id).name, :width => "180px"}) %>
+    <% end %>
+<% end %>
+<script type="text/javascript">
+    function add_autocomplete(column_id, data_id, combination_record) {
+        var base_url = "<%= url_for({:action=> :get_ahead_data,:controller=>"dip/template",:format=>"json"})%>";
+        var attrs = $("input[data_id='" + data_id + "']").toArray();
+        var unedited = $("label[data_id='" + data_id + "']").toArray();
+        var extraParams = {};
+        for (var i in attrs) {
+            extraParams[attrs[i].name] = attrs[i].value;
+        }
+        for (var i in unedited) {
+            extraParams[unedited[i].attributes["name"].value] = unedited[i].attributes["value"].value;
+        }
+        extraParams["combination_record"] = combination_record;
+        extraParams["column_id"] = column_id;
+        $("#" + data_id.toString() + column_id.toString()).autocomplete({
+            url:base_url,
+            extraParams:extraParams});
+    }
+</script>

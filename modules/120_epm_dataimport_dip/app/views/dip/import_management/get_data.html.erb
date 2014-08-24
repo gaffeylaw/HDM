@@ -1,0 +1,24 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "100px"}) do |data| %>
+        <%= link_to(t(:showErrors), {:controller => "dip/error", :action => "index", :id => data[:batch_id]}) %>
+        <%= link_to(t(:delete), {:controller => "dip/import_management", :action => "destroy", :id => data[:batch_id]}) %>
+        <%= link_to(t(:query), {:controller => "dip/import_management", :action => "query", :id => data[:template_id], :batch_id => data[:batch_id]}) %>
+    <% end %>
+    <% builder.column(:template_id, {:title => t(:label_dip_template_name), :sortable => true, :searchable => true, :width => "180px"}) do |data| %>
+        <% getTemplateName(data[:template_id]) %>
+    <% end %>
+    <% builder.column(:percent, {:title => t(:label_dip_import_progress), :sortable => true, :width => "100px"}) do |data| %>
+        <div class="progress progress-striped active" style="z-index:1;margin-bottom:0px !important;border-color:#cbdaee; border-style:solid;">
+          <div class="bar" style="z-index:99;vertical-align: middle; width: <%= data[:percent]/3 %>%;"></div>
+          <label style="color: #000000 ; text-align: center;z-index:999;width: 100%;position: relative;left: 0px;top: -18px"><%= data[:percent]/3 %>%</label>
+        </div>
+    <% end %>
+    <% builder.column(:status, {:title => t(:label_dip_import_status), :sortable => true, :width => "150px"}) do |data| %>
+        <label style="background-color: <%= getColor(data[:status]) %>"><%= getStatus(data[:status]) %></label>
+    <% end %>
+    <% builder.column(:created_by, {:title => t(:created_by), :width => "150px", :sortable => true}) do |data| %>
+        <%= get_username(data[:created_by]) %>
+    <% end %>
+    <% builder.column(:created_at, {:title => t(:created_at), :sortable => true, :width => "120px"}) %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :sortable => true, :width => "120px"}) %>
+<% end %>

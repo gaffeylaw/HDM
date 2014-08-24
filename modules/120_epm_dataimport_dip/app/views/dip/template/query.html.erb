@@ -1,0 +1,230 @@
+<%= common_title %>
+<b><%= t :cur_label %>：<%= Dip::Template.find(params[:id]).name %></b>
+<div id="edit_template_data_msg"></div>
+<div class="page-block">
+  <input type="hidden" id="cur_template_id" value="<%= params[:id] %>"/>
+  <table class="page-block-header">
+    <tr>
+      <td>
+        <% headers=Dip::CombinationHeader.where(:combination_id => Dip::Template.find(params[:id]).combination_id).order(:header_id)
+           i=0
+           headers.each do |h| %>
+            <%= Dip::Header.find(h.header_id).name %>:
+            <%= select :key, i.to_s, getInitValueList(h.header_id), {:include_blank => true}, :style => "margin-bottom: 0px;" %>
+            <% i=i+1 %>
+        <% end %>
+        <input type="hidden" value="<%= params[:id] %>" id="templateId"/>
+        <button onclick="show_export_dialog(event)" class="btn btn-primary"><%= t(:export) %></button>
+        <%= link_to(t(:import), {:controller => "dip/template", :action => "import", :id => params[:id]}, :class => "btn btn-primary") %>
+        <!--<button class="btn btn-primary" onclick="create_data(event)"><%= t(:add) %></button>
+        <button class="btn btn-primary" onclick="save_data(event)"><%= t(:save) %></button>-->
+        <%= link_to t(:back), {:action => :index, :controller => "dip/template"}, :class => "btn btn-primary" %>
+      </td>
+      <td class="page-block-help" style="width: 400px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div class="sub-page-block-body">
+    <%= datatable("data_area", {:action => "get_query_data", :id => params[:id]},
+                  [],
+                  {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+<%= render "dip/template/select_excel_format" %>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var params = {};
+        params['id'] = $("#cur_template_id").val();
+        var current_target = $("#data_area").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        var i = 0;
+        while ($("#key_" + i).length != 0) {
+            $("#key_" + i).bind('change', function (event) {
+                var values = []
+                n = 0;
+                while ($("#key_" + n).length != 0) {
+                    if ($("#key_" + n).val()) {
+                        values.push($("#key_" + n).val());
+                    }
+                    n++;
+                }
+                var current_target = $("#data_area").data("datatable").target;
+                var params = current_target.data.options.defaultOptions;
+                params['valueIds'] = values;
+                current_target.data.options.defaultOptions = params;
+                current_target.loadPage(1);
+            });
+            i++;
+        }
+    })
+    ;
+    function show_export_dialog(event, id) {
+        $("#select_excel_format_modal").modal("show");
+    }
+    function export_data(event) {
+        var type = "xls";
+        if ($("#format_xlsx").attr('checked')) {
+            type = "xlsx"
+        }
+        var values = []
+        n = 0;
+        while ($("#key_" + n).length != 0) {
+            if ($("#key_" + n).val()) {
+                values.push($("#key_" + n).val());
+            }
+            n++;
+        }
+        $.get("<%= url_for(:action=>"export_data",:controller => "dip/template",:format=>:json)%>",
+                {template_id:"<%= params[:id]%>", valueIds:values, type:type}, function (result) {
+                    $("#select_excel_format_modal").modal("hide");
+
+                    location.href = encodeURI("../upload/epm/data/" + result)
+                });
+    }
+    //edit_data
+    var id_list = {};
+    var headers = "<%= @headers%>";
+    headers = headers.length == 0 ? [] : headers.split(",");
+    function random_id() {
+        return Math.floor(Math.random() * 10000000000000000)
+    }
+    function edit_row(event, id) {
+        var e = window.event || event;
+        var target = e.srcElement || e.target;
+        var flag = target.flag
+        if (flag == 1) {
+            $("label[row_id='" + id + "']").css("display", "block");
+            $("input[data_id='" + id + "']").css("display", "none");
+            $("label[data_id='" + id + "']").css("display", "none");
+            target.innerText = "<%= t(:edit)%>"
+            target.flag = 0;
+            delete id_list[id];
+        }
+        else {
+            $("label[row_id='" + id + "']").css("display", "none");
+            $("input[data_id='" + id + "']").css("display", "block");
+            $("label[data_id='" + id + "']").css("display", "block");
+            target.innerText = "<%= t(:cancel)%>";
+            target.flag = 1;
+            id_list[id] = "update";
+
+        }
+    }
+    function delete_row(event, id) {
+        if ("create" == id_list[id]) {
+            delete id_list[id];
+            $("tr[id='" + id + "']").remove();
+        }
+        else {
+            id_list[id] = "delete";
+            $("tr[id='" + id + "']").css("display", "none")
+        }
+    }
+    function create_data(event) {
+        for (var n in headers) {
+            if ($("#key_" + n).val() == undefined || $.trim($("#key_" + n).val().toString()).length < 1) {
+                showFadeBackMessage("edit_template_data_msg", ["<%= t(:notice_select_combination)%>"]);
+                return;
+            }
+        }
+        var values = {}
+        for (var n in headers) {
+            if ($("#key_" + n).val() && $.trim($("#key_" + n).val().toString()).length > 0) {
+                values[headers[n]] = $("#key_" + n).val();
+            }
+        }
+        $.post("<%= url_for({:action=>:can_create_data,:controller=>"/dip/template",:format=>"json"})%>", {
+            values:values, templateId:$("#cur_template_id").val()
+        }, function (result) {
+            if (result["flag"]) {
+                var columns = result["columns"];
+                var data_id = random_id() + "";
+                var html = "";
+                html += "<tr id='" + data_id + "'><td><div>";
+                html += "<a href='javascript:void(0)' onclick=\"edit_row(event,'" + data_id + "')\"><%= t(:edit)%></a>";
+                html += "<a href=\"javascript:void(0)\" onclick=\"delete_row(event,'" + data_id + "')\"><%= t(:delete)%></a>";
+                html += "</div></td>";
+                for (var i=0;i<columns.length;i++) {
+                    html += "<td><div>";
+                    if (columns[i]["template_column"]["value_list"]) {
+                        html += "<input data_id='" + data_id + "' id='" + data_id.toString() + columns[i]["template_column"]["id"].toString() + "' name='" +
+                                columns[i]["template_column"]["view_column"].toString().toLowerCase() + "' type='text' style='margin-bottom: 0px;width: 100%;' onfocus=\"add_autocomplete(\'" +
+                                columns[i]["template_column"]["id"].toString() + "\',\'" + data_id + "\',\'" + result["combination_record"] + "\')\">";
+                    } else {
+                        html += "<input data_id='" + data_id + "' name='" + columns[i]["template_column"]["view_column"].toString().toLowerCase() + "' type='text' style='margin-bottom: 0px;width: 100%;'>"
+                    }
+                    html += "</div></td>";
+                }
+                for (var h in ['updated_at', 'updated_by', 'created_at', 'created_by']) {
+                    html += "<td></td>"
+                }
+                for (var h in headers) {
+                    html += "<td><div>" + $("#key_" + h).find("option:selected").text()
+                    html += "<input value_id='" + data_id + "' style='margin-bottom: 0px;display:none;'" + " header_id='" + headers[h] + "' header_value_id='" + $("#key_" + h).val() + "'/>"
+                    html += "</div></td>"
+                }
+                html += "</tr>";
+                $("#data_area").find(".datatable .table-body tbody :first").prepend(html);
+                id_list[data_id] = "create";
+            } else {
+                showFadeBackMessage("edit_template_data_msg", result["msg"]);
+            }
+        }, "json");
+
+    }
+    function save_data(event) {
+        var records = [];
+        for (var p in id_list) {
+            var attrs = $("input[data_id='" + p + "']").toArray();
+            var unedited = $("label[data_id='" + p + "']").toArray();
+            if (attrs.length > 0) {
+                var record = {};
+                record["id"] = p;
+                record["operation"] = id_list[p];
+                for (var i in attrs) {
+                    record[attrs[i].name] = attrs[i].value;
+                }
+                if (unedited.length > 0) {
+                    for (var i in unedited) {
+                        record[unedited[i].attributes["name"].value] = unedited[i].attributes["value"].value;
+                    }
+                }
+                if (id_list[p] == "create") {
+                    var header_value_attrs = $("input[value_id='" + p + "']").toArray();
+                    var header_values = {}
+                    for (var i in header_value_attrs) {
+                        header_values[header_value_attrs[i].getAttribute("header_id")] = header_value_attrs[i].getAttribute("header_value_id");
+                    }
+                    record["header_values"] = header_values;
+                }
+                records.push(record)
+            }
+        }
+
+        if (records.length > 0) {
+            $.post("<%= url_for(:action=>:save_data,:controller => "/dip/template",:format=>:json)%>", {
+                records:records, templateId:$("#cur_template_id").val()
+
+            }, function (result) {
+                if (result.success) {
+                    var current_target = $("#data_area").data("datatable").target;
+                    current_target.load();
+                    id_list={};
+                    showFadeBackMessage("edit_template_data_msg", result.msg);
+                }
+                else {
+                    showFadeBackMessage("edit_template_data_msg", result.msg);
+                }
+
+            }, "json");
+        }
+        else {
+            showFadeBackMessage("edit_template_data_msg", ["<%= t(:no_data_to_save)%>"]);
+        }
+    }
+</script>
+
+
+
+

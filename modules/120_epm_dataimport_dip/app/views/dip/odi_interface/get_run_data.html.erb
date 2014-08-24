@@ -1,0 +1,12 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:operation, {:title => t(:operation), :width => "80px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="show_select_interface(event,<%="\'#{data[:id]}\'"%>)"><%= t(:label_run) %></a>
+        <a href="javascript:void(0)" onclick="show_status(event,<%="\'#{data[:id]}\'"%>)"><%= t(:status) %></a>
+    <% end %>
+    <% builder.column(:name, {:title => t(:name), :width => "180px", :searchable => true}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :width => "100px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :width => "140px"}) %>
+<% end %>
+</script>

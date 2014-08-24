@@ -1,0 +1,9 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+
+    <% builder.column(:code, {:title => t(:label_code), :sortable => true, :width => "140px"}) %>
+    <% builder.column(:name, {:title => t(:label_name), :sortable => true, :width => "140px"}) %>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :sortable => true, :width => "140px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :sortable => true, :width => "140px"}) %>
+<% end %>

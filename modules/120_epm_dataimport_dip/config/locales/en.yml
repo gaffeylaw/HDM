@@ -1,0 +1,412 @@
+en:
+   import : import
+   label_dip_temptype: Template Type
+   label_dip_template_name: Tempate Name
+   label_dip_template_creator: Creater
+   label_dip_template_creatTime: Create Time
+   browse: Browse
+   label_dip_template: Template
+   label_dip_upload: Upload File
+   label_action_import: File Import
+   label_dip_template_detail: Template Detail
+   label_dip_template_name: Template Name
+   label_dip_template_owner: Template Creater
+   label_dip_template_type: Template Type
+   label_dip_template_columns: Template Columns
+   label_dip_temptype_list: Template Type List
+   label_dip_template_edit: Edit Template
+   label_template_columns_list: Template Column List
+   label_dip_tempcolumn_name: Column Name
+   label_dip_column_create: Create Column
+   label_dip_column_edit: Edit Column
+   label_dip_validation: Validation
+   label_dip_validation_list: Validation List
+   label_dip_validation_new: New Validation
+   label_dip_validation_edit: Eidt Validation
+   manage_validation: Manage Validation
+   args: Arguments
+   label_dip_template_validation: Tempalte Validation
+   label_dip_validation_add: Add Validation
+   validation: Validation
+   program: Program
+   all: All
+   query: Query
+   label_dip_tmp_table: Temporary Table
+   label_dip_actual_table: Actual Table
+   label_dip_query_view: Query View
+   label_dip_column_name: Table Column
+   add_validation: Add Validation
+   label_dip_template_group: Template Group
+   label_dip_group_list: Group List
+   label_dip_new_group: New Group
+   label_dip_group_name: Group Name
+   label_dip_save_group: Save Group
+   label_dip_delete_group: Delete Group
+   label_dip_add_template: Add Template
+   label_dip_group_add_template: Add Template To Group
+   label_dip_user_authority: User Authority
+   label_dip_user_list: User List
+   label_dip_add_authority: Add Authority
+   user_name: User Name
+   label_dip_import_progress: Import Progress
+   label_dip_import_status: Import Status
+   label_dip_import_management: Import Management
+   import_status: Import Status
+   importing_to_tmp: Importing Data To Temporary Table
+   validating: Validating Data
+   interrupted: Operation Interrupted
+   finished: Finished
+   showErrors: Error Info
+   invalid: Invalid
+   label_dip_error: Errors for Data Validation
+   row_number: Row Number
+   error_message: Error Message
+
+   label_dip_template_category: Template Category
+   label_action_setting: Setting
+   label_dip_template_create: Create Template
+   label_template_name: Template Name
+   label_dip_template_column_name: Name
+   label_dip_combination_manage: Manage Combination
+   label_dip_validations: Validations
+   label_dip_add_validation: Add Validation
+   selectAll: Select All
+   newColumn: New Column
+   label_dip_combination: Combination
+   label_dip_combination_list: Combination List
+   generate: Generate Combination
+   key_value_manage: Key Value Manage
+   label_dip_enable: Enable
+   label_dip_disable: Disable
+   label_dip_header_value: Values
+   label_dip_header_value_list: Value List
+   key: Key
+   new_header: Add Key
+   delete_header: Delete Key
+   rename_header: Rename Header
+   value: Value
+   add_value: Add Value
+   delete_value: Delete Value
+   label_dip_add_value_authority: Add Value Authority
+   label_dip_add_template_authority: Add Template Authority
+   label_template_authority: Template Authority
+   label_value_authority: Value Authority
+   label_dip_combination_create: Create Combination
+   label_enable_immediately: Enable Now
+   label_yes: Y
+   label_no: N
+   label_dip_header_value_create: Create Value
+   label_rename_combination: Rename Combination
+   label_delete_combination: Delete Combination
+   label_delete_combination_items: Delete Combination Items
+   label_combination_rename: Rename
+   label_dip_value_authority: Value Authority
+   delete_authority: Delete Authority
+   label_select: Please Select
+   label_template_column_edit: Edit Template
+   label_view_column_edit: Edit View
+   label_dip_header_value_create: Add Value
+   label_move_up: Up
+   label_move_down: Down
+   label_view_columns_list: View Column List
+   label_dip_template_category_list: Category List
+   category_manage: Category Manage
+   label_dip_template_category_create: Create Category
+   label_action_query: Query
+   label_dip_header_create: Create Key
+   label_dip_odi_server: ODI Server
+   label_odi_server_list: ODI Server List
+   label_new_server: Add ODI Server
+   label_delete_server: Remove ODI Server
+   label_odi_interface_category_list: Interface Category List
+   label_new_interface_category: New Interface Category
+   label_delete_interface_category: Delete Category
+   label_odi_server_manage: ODI Server Manage
+   label_dip_odi_interface_category: Interface Category List
+   label_interface_param: Interface Parameters
+   label_dip_interface_strategy: Interface Strategy
+   label_odi_server_name: ODI Server Name
+   label_odi_server_desc: ODI Server Description
+   label_odi_server_url: URL
+   label_odi_server_workspace: Workspace
+   label_odi_server_odi_user: ODI User Name
+   label_odi_server_odi_password: ODI User Password
+   label_odi_interface_category_code: Category Code
+   label_odi_interface_category_name: Category Naem
+   label_odi_interface_category_desc: Description
+   label_odi_interface_category_assigned_value: Assigned Value
+   label_dip_odi_interface_param_no:  Parameter Number
+   label_dip_odi_interface_param_code: Parameter Code
+   label_dip_odi_interface_param_name: Parameter Name
+   label_dip_odi_interface_param_project: Parameter Project
+   label_dip_odi_interface_header_id: Parameter Keryset
+   label_dip_odi_interface_param_desc: Parameter Description
+   label_dip_odi_interface_param: Interface Parameters
+   label_odi_interface_param_list: Parameter List
+   label_dip_add_param: Add Parameter
+   label_dip_delete_param: Remove Parameter
+   label_odi_interface_strategy_list: Strategy List
+   label_dip_new_strategy: Add Interface
+   label_dip_delete_strategy: Delete Interface
+   label_dip_odi_interface_no: Interface Number
+   label_dip_odi_interface_code: Interface Code
+   label_dip_odi_interface_name: Interface Name
+   label_dip_odi_interface_version: Interface Version
+   label_dip_odi_interface_context: Interface Context
+   label_dip_odi_interface_desc: Interface Description
+   label_dip_odi_interface_set: Interface Strategy
+   label_action_run_interface: Run Interface
+   label_select_interface: Select Interface
+   label_select_params: Select Parameters
+   label_run_interface: Run Interface
+   label_interface_status: Processing Status
+   label_dip_import_program: Import Program
+   notice_choose_file: Please choose file to be uploaded.
+   page_load_error: Page load error!Please reload this page by click the right link.
+   template_not_found: Corresponding template not found.
+   combination_not_right: Please check that you've choose the right combination.
+   label_binding_key_set: Binding Key
+   import_to_tmp_error : Error occur when importing data to temporary table
+   validate_error : Validation failed
+   transfer_error : Error ocuur when transferring data to actrual table
+   transferring: Transferring data to actual table
+   show_header_info: Show headers
+   label_dip_header_list: Header list
+   label_name: Name
+   label_code: Code
+   label_dip_header_edit: Edit header
+   edit_header: Edit header
+   label_batch_job: Increment job
+   already_exist: Already exist
+   label_dip_header_value_value: value
+   label_operation_success: Operation Success
+   label_operation_fail: Operation Fail
+   label_dip_header_name : Name
+   label_dip_header_code : Code
+   label_dip_combination_name: Name
+   label_dip_template_category_name: Name
+   label_template_validation_manage: Manage Validation
+   label_cur_template: Current Template
+   label_edit_template_column_and_view: Edit Template Column and View Column
+   label_edit_template: Edit Template Information
+   descs: Description
+   label_dip_open: Open
+   label_dip_close: Close
+   label_run: Run
+   label_interface: Interface
+   submit_fail: Submit Fail
+   label_interface_status: Operation Status
+   label_query_fail: Query Failed
+   label_interface_category: Interface Category
+   label_done: Done
+   label_error: Error
+   label_running: Running
+   label_warning: Warning
+   label_queued: Queued
+   label_waiting: Waiting
+   label_select_xls_version: Select Excel Format
+   label_default_authorized: Default Authorized
+   label_dip_changeable_table: Tables
+   label_changeable_table_list: Table List
+   label_manage_data: Manage Data
+   label_design_table: Design Table
+   label_changeable_table_add: Add Table
+   label_changeable_table_name: Table Name
+   label_dip_changeable_table_header: Design Table
+   label_add_column: Add Column
+   label_value_changeable: Value Changeable
+   label_add_data: Add Data
+   label_dip_changeable_table_item: Manage Data
+   label_edit_data: Edit Data
+   label_can_view_all_data: Can View All Data
+   label_edit_column : Edit Column
+   label_value_src: Value Source
+   less_than_30_char: Should less than 30 char
+   program_exception: System Exception
+   please_choose_file: Please choose file
+   only_support_xls: Only support xls file
+   file_data_error: File data error
+   label_row: Row
+   error_msg: error occur
+   cur_label: Current
+   label_dip_category: Categories
+   label_new_report: New Report
+   label_dip_dip_report: Reports
+   label_dip_report_name: Name
+   label_dip_report_program: Program
+   label_dip_report_columns: Column Sequence
+   label_dip_report_columns_desc: Column Description
+   label_dip_report_descs: Report Description
+   label_dip_report_combination: Combination
+   label_report_category: Category
+   label_selected: Selected
+   label_new_category: New Category
+   label_report_category: Report Category
+   label_template_category: Template Category
+   label_dip_dip_category: Category Manage
+   label_delete_category: Delete Category
+   label_dip_category_edit: Edit Category
+   label_parent_category: Parent Category
+   label_dip_dip_category_name: Category name
+   label_category_parent: Parent Category
+   label_dip_dip_authority: Authority
+   label_report_authority: Report Authority
+   label_dip_add_report_authority: Add Report Authority
+   label_dip_report_name: Report Name
+   label_odi_authority: ODI Authority
+   label_dip_add_odi_authority: Add Odi Authority
+   label_not_authorized: Not Authorized
+   label_action_edit_data: Edit Data
+   no_data_to_save: No data needs to be saved
+   notice_select_combination: Please select correct combination
+   combination_error: Combination error or combination colsed
+   validation_fail: validation failed
+   sheet_name: Sheet
+   label_dip_report_db: Database
+   label_dip_report_is_pkg: Package or not
+   label_report_parameter: Report Parameters
+   label_parameter_set: Parameter Set
+   label_parameter_manage: Parameter Manage
+   label_dip_parameter_set: Parameter Set
+   label_dip_parameter_set_create: New parameter set
+   label_dip_parameter_set_name: Parameter Set Name
+   label_dip_parameter: Parameter
+   label_index_no: Index No.
+   label_dip_parameter_create: New Parameter
+   label_dip_parameter_index_no: Index No.
+   label_dip_parameter_header: Value Set
+   label_dip_template_editable: Editable
+   label_infa_repository: Reporsitory
+   label_infa_repository_service_url: Service URL
+   label_infa_repository_domain_name: Repository Domain
+   label_infa_repository_name: Repository Name
+   label_infa_user_name: User Name
+   lable_infa_user_namespace: User Namespace
+   label_dip_infa_repository: Repository
+   label_infa_repository_create: Create Repository
+   label_infa_repository_alias: Repository Alias
+   label_infa_password: Password
+   synchronous: Synchronous
+   label_dip_infa_repository_repository_name: Repository Name
+   label_dip_infa_repository_user_name: User Name
+   label_dip_infa_repository_service_url: Service URL
+   label_dip_infa_repository_repository_alias: Repository Alias
+   label_infa_workflow: Workflow
+   label_infa_folder_name: Folder
+   label_infa_workflow_name_alias: Alias
+   label_infa_workflow_name: Name
+   label_infa_workflow_valid: IsValid
+   label_dip_infa_workflow: Workflow
+   label_dip_infa_workflow_name_alias: Alias
+   label_workflow_parameter: Workflow Parameter
+   label_infa_workflow_set_create: New Workflow Set
+   label_dip_infa_workflow_set: Workflow Set
+   label_dip_infa_workflow_set_name: Name
+   label_dip_infa_workflow_set_item: Workflow Set Item
+   label_infa_workflow_set_item_index_no: Index Number
+   label_infa_workflow_set_item_create: New Workflow Set Item
+   label_dip_infa_workflow_set_item_index_no: Index Number
+   label_dip_infa_workflow_set_item_workflow: Workflow
+   label_dip_infa_workflow_run: Run Workflow
+   label_run: Run
+   label_select_workflow: Select Workflow
+   label_infa_authority: Informatica
+   label_param_scope: Scope
+   label_dip_column_is_pk: Primary Key
+   label_dip_column_value_source: Value Source
+   label_dip_template_overwritable: Overwritten
+   label_dip_end_program: Ending Program
+   label_dip_column_mapped: Need to be mapped
+   label_dip_column_omitted: Omitted when save
+   label_dip_column_data_type: Data Type
+   label_true: Y
+   label_false: N
+   label_visible: Visible
+   label_editable: Editable
+   label_value_list_program: Fetch Value Program
+   label_nilable: Can be nil
+   label_dip_view_column: View Column
+   label_dip_template_increment_import: Increment Import
+   label_dip_odi10_server: ODI10 Server
+   label_odi_server_work_repository: ODI Work Repository
+   label_odi_server_jdbc_driver: Jdbc Driver
+   label_odi_server_jdbc_url: Jdbc Url
+   label_odi_server_jdbc_user: Jdbc User
+   label_odi_server_jdbc_password: Jdbc Password
+   label_odi_server_work_repository: Work Repository
+   label_odi_server_odi_user: ODI User
+   label_odi_server_agent_host: Agent Host
+   label_odi_server_agent_port: Agent Port
+   label_odi_server_odi_password: ODI Password
+   label_dip_column_length: View Column Length
+   label_odi_server_url: Webservice URL
+   label_help: Help
+   label_dip_odi_log: LOG
+   label_dip_odi_out: OUTPUT
+   label_session_id: SESSION_ID
+   label_odi_interface_free: Free
+   label_delayed_job_not_start: Delayed job not started
+   label_odi_category: ODI Category
+   label_infa_category: Infa Category
+   change: Change
+   parent_category: Parent Category
+   new_sub_category: New Sub Categroy
+   select_parent_category: Please select parent category
+   invalid_data: Invalid data
+   label_dip_dip_category_category_type: Category type
+   label_existed: Already exist
+   label_dip_dip_category_parent: Parent category
+   label_not_existed: not exist
+   label_nothing_to_change: Nothing to change
+   label_nothing_to_delete: Nothing to delete
+   label_unclassified: Unclassified
+   label_dip_odi_interface: ODI Interfaces
+   invalid: Invalid
+   label_odi_interface_code: Interface Code
+   label_odi_interface_name: Interface Name
+   label_odi_interface_desc: Interface Description
+   label_new_interface: New Interface
+   label_odi_10_server_manage: ODI 10 Server Manage
+   label_odi_11_server_manage: ODI 11 Server Manage
+   label_dip_odi_interface_no: No.
+   label_dip_odi_interface_code: Code
+   label_dip_odi_interface_name: Name
+   label_dip_odi_interface_version: Version
+   label_dip_odi_interface_context: Context
+   label_dip_odi_interface_dexc: Description
+   label_dip_odi_interface_server: Server
+   label_dip_odi_interface_category: Category
+   label_dip_odi_interface_server_version: Server Version
+   label_dip_odi_interface_interface_name: Name
+   label_dip_odi_interface_interface_code: Code
+   label_dip_odi_interface_interface_version: Version
+   label_dip_odi_interface_interface_context: Context
+   label_dip_informatica_interface: Informatica Interface
+   label_infa_workflow_folder_name: Folder Name
+   label_infa_workflow_repository: Repositoy
+   label_infa_workflow_category: Category
+   label_select_category: Please select category
+   label_select_parameter: Select Parameter
+   label_parameter_set_manage: Parameter Set Manage
+   label_alias: Alias
+   label_parameter_no: Parameter No.
+   label_parameter_name: Parameter Name
+   label_parameter_alias: Parameter Alias
+   label_parameter_value: Parameter Value
+   label_dip_parameter_name: Parameter Name
+   label_dip_parameter_name_alias: Parameter Alias
+   label_dip_infa_workflow_name: Workflow Name
+   label_dip_infa_workflow_folder_name: Folder Name
+   label_parameter_scope: Scope
+   label_dip_infa_workflow_index_no: No.
+   label_merge: Merge
+   label_replace: Replace
+   label_equal: equal
+   label_unequal: not equal
+   label_include: include
+   label_irm_ldap_source_encoding: Encoding
+   label_in_process: In process
+   label_new: New
+   end_program_error: End_program Failed
+
+

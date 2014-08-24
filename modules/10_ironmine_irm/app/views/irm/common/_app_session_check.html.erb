@@ -1,0 +1,87 @@
+<script type="text/javascript">
+  //全局参数
+
+  var secondsLeftValue = ('<%= get_session_time %>');  //当前session过期的时剩余间值（秒）
+  //var secondsPopupValue = secondsLeftValue - 30; //弹出警告窗口的时间值（秒）
+  var lastPageActivityTime = new Date().getTime(); //最后一次活动的时间
+  //  用户打开页面则开始页面session过期检测
+  $(document).ready(function(){
+      if (typeof(startSessionTimer)!='undefined') startSessionTimer();
+      //页面活动后调用
+      document.documentElement.onkeydown=updateSessionTimeouts;
+      document.documentElement.onclick=updateSessionTimeouts;
+  });
+
+  //开始session 会话计时
+  function startSessionTimer() {
+      // 下一次检查session是否超时的时间结点
+      var popupValue = secondsLeftValue*1000-(new Date().getTime()- lastPageActivityTime );
+
+      schedulePopup(popupValue);
+  }
+  //设置在等待多长时间后弹出警告
+  function schedulePopup(t) {
+      if (timeoutUniqueId != null) {
+          clearTimeout(timeoutUniqueId);
+      }
+      timeoutUniqueId = setTimeout(alertTimeout, t);
+  }
+  //退出登录处理
+  function doLogout() {
+      var popupValue = secondsLeftValue*1000-(new Date().getTime()- lastPageActivityTime );
+
+      if(popupValue>0){
+          schedulePopup(popupValue);
+      }
+      else{
+          window.location.href = "<%=logout_url %>";
+      }
+  }
+  var alertWindow = null;
+  var parentWindow = null;
+  var timeoutUniqueId = null;
+  //更新session 过期时间
+  function updateSessionTimeouts() {
+      lastPageActivityTime = new Date().getTime();
+  }
+  function alertTimeout() {
+      var popupValue = secondsLeftValue*1000-(new Date().getTime()- lastPageActivityTime );
+      //如果用户在这期间有过活动,则将session过期检测的时间点往后推
+      if(popupValue>0){
+          schedulePopup(popupValue);
+      }
+      else{
+          alertWindow = window.open('/session_settings/timeout_warn', "ironmine",'width=360,height=280,left='+(screen.width-360)/2+',top='+(screen.height-280)/2+',location=no,dependent=no,resizable=yes,toolbar=no,status=no,directories=no,menubar=no,scrollbars=yes', false);
+          parentWindow = window;
+          document.body.onfocus = alertFocus;
+          // 自动退出系统前等待30秒
+          setTimeout(doLogout, 30 * 1000);
+      }
+  }
+
+  function alertFocus() {
+      if (alertWindow) {
+          if (!alertWindow.closed) {
+              alertWindow.focus();
+          } else {
+              alertWindow = null;
+              document.body.onfocus = closePopups;
+          }
+      }
+  }
+
+  //关闭弹出窗口
+  function closePopups(){
+      if(alertWindow !=null){
+          try{
+              alertWindow.continue_flag = null;
+              alertWindow.close();
+          }catch(a){}
+          alertWindow=null;
+      }
+  }
+  //离开当前窗口（刷新或者离开）关闭弹出窗口
+  window.onunload=function(){
+    closePopups();
+  }
+</script>

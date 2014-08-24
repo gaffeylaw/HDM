@@ -1,0 +1,39 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "30px"}) do |data| %>
+        <input type="checkbox" name="valueIds" value="<%= data[:id] %>"/>
+    <% end %>
+    <% builder.column(:operation, {:title => t(:operation), :width => "30px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="show_edit_value(event,<%="\'#{data[:id]}\'"%>,<%="\'#{data[:name]}\'"%>)"><%= t(:edit) %></a>
+    <% end %>
+    <% builder.column(:name, {:title => t(:name), :width => "180px",:searchable => true}) %>
+    <% builder.column(:parent, {:title => t(:label_category_parent), :width => "180px"}) do|data|%>
+        <%= (category=Dip::DipCategory.where(:id=>data[:parent]).first).nil? ? "" : category.name%>
+    <%end%>
+    <% builder.column(:updated_by, {:title => t(:updated_by), :sortable => true, :width => "140px"}) do |data| %>
+        <%= get_username(data[:updated_by]) %>
+    <% end %>
+    <% builder.column(:updated_at, {:title => t(:updated_at), :sortable => true, :width => "140px"}) %>
+<% end %>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#selectAll").bind("click", function () {
+            if ($("#selectAll")[0].checked) {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = true;
+                }
+            } else {
+                var checkboxes = $("input[name='valueIds']").toArray()
+                for (var checkbox in checkboxes) {
+                    checkboxes[checkbox].checked = false;
+                }
+            }
+        });
+    });
+    function show_edit_value(event,id,name){
+        $("#cur_category_id").val(id);
+        $("#edit_category_name").val(name);
+        $("#edit_modal").modal("show");
+    }
+</script>

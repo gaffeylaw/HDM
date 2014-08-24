@@ -1,0 +1,36 @@
+<div class="modal hide" id="create_modal" style="margin-left:-400px ;width: 800px">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3><%= t(:label_dip_combination_create) %></h3>
+  </div>
+  <div class="modal-body">
+    <div id="new_combination_msg"></div>
+    <table class="detail-list" cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+      <tr>
+        <td class="data-col" colspan="2">
+          <% i=0
+             headers=getHeaders()
+             headers.each do |header| %>
+              <input type="checkbox" name="headers" value="<%= header[:id] %>"/><%= header.name %> &nbsp;
+              <% if (i+1)%8==0 %>
+                  <br/>
+              <% end %>
+          <% i=i+1
+             end %>
+        </td>
+      </tr>
+      <tr>
+        <td class="label-col"><label><%= t(:name) %></label></td>
+        <td class="data-col">
+          <input type="text" id="combination_name" name="name"/>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" onclick="generateCombination(event)"><%= t(:generate) %></button>
+    <button type="submit" class="btn" data-dismiss="modal"><%= t(:close) %></button>
+  </div>
+</div>

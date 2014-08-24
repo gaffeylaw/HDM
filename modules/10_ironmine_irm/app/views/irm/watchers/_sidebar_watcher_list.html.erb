@@ -1,0 +1,33 @@
+<% if allow_to_function?(:view_watcher) %>
+    <% l_editable = allow_to_function?(:edit_watcher)%>
+    <% (l_editable = editable && l_editable) if editable.present?%>
+    <%= form_tag({:controller => "irm/watchers", :action => "add_watcher", :watchable_id => watchable.id,:_dom_id=>dom_id,:editable=>editable}, :remote => true) do %>
+      <div class="sidebar-block">
+          <div class="sidebar-block-header">
+            <h2><%= t :label_irm_watcher %><%= ("(" + watchers_size(watchable).to_s + ")")%> > <a href="javascript:void(0);" id="add_watcher_self" style="color:white;">自己</a></h2>
+          </div>
+          <div class="sidebar-block-body">
+            <% if l_editable %>
+              <div class="form-inline">
+                  <%= lov_field_tag("watcher",Irm::Person, {:class=>"input-mini",:id => "watcher",:style=>"width:90px;"}) %>
+                  <%= hidden_field_tag "watchable_type", watchable.class.to_s%>
+                  <%= link_submit t(:add),{:class=>"btn btn-primary"}%>
+              </div>
+            <% end %>
+            <div class="form-inline">
+              <table>
+                  <%= watchers_list(watchable,l_editable,dom_id)%>
+              </table>
+            </div>
+          </div>
+      </div>
+    <% end %>
+<% end %>
+<script type="text/javascript">
+   $(function(){
+       $("#add_watcher_self").click(function(){
+        $("#watcher").val("<%= Irm::Person.current.id%>");
+           $("#watcher_label").val("<%= Irm::Person.current.full_name%>");
+       });
+   });
+</script>

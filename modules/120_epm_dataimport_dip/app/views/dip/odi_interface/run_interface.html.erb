@@ -1,0 +1,99 @@
+<!--页面结构-->
+<div class="page-block">
+  <table class="page-block-header">
+    <tr>
+      <td class="page-block-title" style="width: 140px">
+        <h2 class="block-title"></h2>
+      </td>
+      <td class="page-block-help" style="width: 250px">
+        <div id="searchBox"></div>
+      </td>
+    </tr>
+  </table>
+  <div id="run_msg"></div>
+  <div class="page-block-body">
+    <%= datatable("data_table", {:action => "get_run_data", :format => "json"},
+                  [],
+                  {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+  </div>
+</div>
+
+<%= render "select_interface" %>
+<%= render "select_param" %>
+<%= render "query_status" %>
+
+<script type="text/javascript">
+    function show_select_interface(event, id) {
+        var params = {};
+        category_id = id;
+        params['category_id'] = id;
+        var current_target = $("#data_table2").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#select_interface_modal").modal("show")
+    }
+    function show_select_params(event) {
+        var params = {};
+        params['category_id'] = category_id;
+        var current_target = $("#data_table1").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#select_interface_modal").modal("hide")
+        $("#select_param_modal").modal("show")
+    }
+    function run_interface(event) {
+        var odi_category_id = category_id;
+        var interface_ids = [];
+        var i = 0;
+        var checkboxes = $("input[name='valueIds']").toArray();
+        for (var checkbox in checkboxes) {
+            if (checkboxes[checkbox].checked) {
+                interface_ids[i] = checkboxes[checkbox].value;
+                ++i;
+            }
+        }
+        var parameters = {};
+        var params = $("select[name='header[id]']").toArray();
+        for (var p in params) {
+            var id = params[p].attributes["paramid"].value;
+            var value = params[p].value;
+            parameters[id] = value;
+        }
+        var params = $("input[name='header[id]']").toArray();
+        for (var p in params) {
+            var id = params[p].attributes["paramid"].value;
+            var value = params[p].value;
+            parameters[id] = value;
+        }
+        $.post("<%= url_for({:action=>:run,:controller=>"dip/odi_interface",:format=>:json})%>", {
+            category_id: odi_category_id, interface_ids: interface_ids, parameters: parameters
+        }, function (result) {
+            if (result.success) {
+                $("#select_param_modal").modal("hide")
+                showFadeBackMessage("run_msg", result.msg);
+                if (result.odi != "10") {
+                    show_status(null, result.category_id);
+                }
+            } else {
+                showFadeBackMessage("run_interface_msg", result.msg);
+            }
+        }, "json");
+
+    }
+    function on_previous(event) {
+        $("#select_param_modal").modal("hide")
+        $("#select_interface_modal").modal("show")
+    }
+    function show_status(event, id) {
+        var params = {};
+        params['category_id'] = id;
+        var current_target = $("#data_table5").data("datatable").target;
+        current_target.data.options.defaultOptions = params;
+        current_target.data.options.searchOptions = {};
+        current_target.loadPage(1);
+        $("#query_status_modal").modal("show");
+    }
+</script>
+
