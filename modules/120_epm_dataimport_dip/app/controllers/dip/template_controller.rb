@@ -84,27 +84,24 @@ class Dip::TemplateController < ApplicationController
       order=order_name +" "+order_value
     end
     category_id=params[:category_id]
-    authorized_template=Dip::DipAuthority.get_all_authorized_data(Irm::Person.current.id, Dip::DipConstant::AUTHORITY_PERSON, Dip::DipConstant::AUTHORITY_TEMPLATE).collect { |a| "'"+a.function+"'" }.join(",")
-    if !authorized_template.nil? && authorized_template.size > 0
-      sql="select distinct t.* from dip_template t where t.id in (#{authorized_template})"
-      if category_id&&category_id!='unclassified'
+      sql="select t1.* from DIP_TEMPLATE t1,DIP_AUTHORITYXES t2 where t1.\"ID\"=t2.\"FUNCTION\" and t2.FUNCTION_TYPE='TEMPLATE' and t2.PERSON_ID='#{Irm::Person.current.id}'"
+      if category_id
         categories=Dip::DipCategory.get_all_child(category_id)
-        list= categories.empty? ? "('-1')" : "(#{categories.collect { |c| "'"+c+"'" }.join(",")})"
-        sql << " and  t.template_category_id in #{list}"
+        sql << " and  t1.template_category_id in (#{categories.collect{|c|"'#{c}'"}.join(",")})"
       else
-        sql << ' and  t.template_category_id is null'
+        sql << ' and  t1.template_category_id is null'
       end
       if params[:name]
-        sql << " and upper(t.name) like upper('%#{Dip::Utils.filter_sql(params[:name])}%') "
+        sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:name])}%') "
       elsif params[:code]
-        sql << " and upper(t.name) like upper('%#{Dip::Utils.filter_sql(params[:code])}%') "
+        sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:code])}%') "
       elsif params[:descs]
-        sql << " and upper(t.name) like upper('%#{Dip::Utils.filter_sql(params[:descs])}%') "
+        sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:descs])}%') "
       end
-      sql << " order by t.#{order} "
+      sql << " order by t1.#{order} "
       templates=Dip::Template.find_by_sql(Dip::Utils.paginate(sql, start, limit))
       count=Dip::Utils.get_count(sql)
-    end
+
     respond_to do |format|
       format.html {
         @count = count
@@ -268,26 +265,25 @@ class Dip::TemplateController < ApplicationController
   def next_value_list
     valueIds=params[:valueIds]
     templateId=params[:templateId]
-    headers=Dip::CombinationHeader.where(:combination_id => Dip::Template.find(templateId).combination_id).order(:header_id).collect { |h| h.header_id }
-    combination= Dip::Combination.find(Dip::Template.find(templateId).combination_id)
-    sql="select distinct DIP#{headers[valueIds.length].to_s.upcase} from DIP#{combination.id.to_s.upcase}_VIEW where enabled=1 "
+    template=Dip::Template.where(:id=>templateId).first
+    combination=Dip::Combination.where(:id=>template[:combination_id]).first
+    headers=Dip::CombinationHeader.find_by_sql("SELECT t2.\"ID\",t2.CODE,t2.\"NAME\" FROM DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 WHERE t2.\"ID\" = t1.HEADER_ID AND t1.COMBINATION_ID = '#{template[:combination_id]}' ORDER BY t1.HEADER_ID")
+    sql="select distinct t1.\"#{headers[valueIds.length][:code].to_s.upcase}_V\" \"VALUE\",t1.\"#{headers[valueIds.length][:code].to_s.upcase}\" \"ID\" from \"#{combination[:code]}\" t1,DIP_AUTHORITYXES t2 where t1.enabled=1 and t2.function_type='VALUE' "
+    sql << " and t2.person_id='#{Irm::Person.current.id}' and t1.\"#{headers[valueIds.length][:code].to_s.upcase}\"=t2.function"
     i=0
     valueIds.each do |v|
-      sql << " and "
-      sql << "DIP#{headers[i].to_s.upcase}='#{v}'"
+      sql << " and t1.\"#{headers[i][:code].to_s.upcase}\"='#{v}'"
       i=i+1
     end
+    sql<< " order by t1.\"#{headers[valueIds.length][:code].to_s.upcase}\" "
     values=ActiveRecord::Base.connection().execute(sql)
-    authorized=[]
+    returnValue=[["", ""]]
     while (row=values.fetch)
-      if Dip::DipAuthority.authorized?(Irm::Person.current.id, row[0])
-        authorized << row[0]
-      end
+        returnValue<<row
     end
-    returnValue=authorized.collect { |a| [Dip::HeaderValue.find(a).value, a] }.sort_by { |t| t[0] }
     respond_to do |format|
       format.html {
-        render :json => {:index => valueIds.length, :values => [["", ""]]+returnValue}
+        render :json => {:index => valueIds.length, :values => returnValue}
       }
     end
   end
@@ -330,7 +326,7 @@ class Dip::TemplateController < ApplicationController
         @count=count
         @template=template
         @template_column=Dip::TemplateColumn.where(:template_id => @template.id).order(:index_id)
-        @headers=Dip::CombinationHeader.where(:combination_id => template.combination_id)
+        @headers=Dip::CombinationHeader.find_by_sql("select t2.CODE,t1.HEADER_ID from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2  where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{template[:combination_id]}'")
       }
     end
   end
@@ -366,10 +362,10 @@ class Dip::TemplateController < ApplicationController
           header_row << t[:name].to_s
         end
         combination_id=template.combination_id
-        headers=Dip::CombinationHeader.where(:combination_id => combination_id).order("header_id")
+        headers=Dip::CombinationHeader.find_by_sql("SELECT t1.HEADER_ID,t2.CODE,t2.\"NAME\" FROM DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 WHERE t1.HEADER_ID = t2.\"ID\" AND t1.COMBINATION_ID = '#{combination_id}' order by t1.header_id")
         headers.each do |h|
-          table_headers << "dip"+h.header_id.to_s.downcase
-          header_row << Dip::Header.find(h.header_id).name.to_s
+          table_headers << "#{h[:code].to_s.downcase}_v"
+          header_row << h[:name]
         end
         sheet.add_row(header_row, :types => Dip::Utils.get_type(header_row))
         if Dip::DipAuthority.authorized?(Irm::Person.current.id, template.id)
@@ -398,10 +394,10 @@ class Dip::TemplateController < ApplicationController
         sheet.row(0).push(t.name.to_s)
       end
       combination_id=template.combination_id
-      headers=Dip::CombinationHeader.where(:combination_id => combination_id).order("header_id")
+      headers=Dip::CombinationHeader.find_by_sql("SELECT t1.HEADER_ID,t2.CODE,t2.\"NAME\" FROM DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 WHERE t1.HEADER_ID = t2.\"ID\" AND t1.COMBINATION_ID = '#{combination_id}' order by t1.header_id")
       headers.each do |h|
-        table_headers << "dip"+h.header_id.to_s.downcase
-        sheet.row(0).push(Dip::Header.find(h.header_id).name.to_s)
+        table_headers << "#{h[:code].to_s.downcase}_v"
+        sheet.row(0).push(h[:name])
       end
       if Dip::DipAuthority.authorized?(Irm::Person.current.id, template.id)
         (1..page).each do |i|
@@ -581,79 +577,27 @@ class Dip::TemplateController < ApplicationController
 
   def get_query_sql(order, template, values)
     if template.combination_id
+      combination=Dip::Combination.where(:id=>template[:combination_id]).first
       sql_select= "select v.*"
-      from_sql=" from #{template.query_view} v, DIP#{template.combination_id.to_s.upcase}_VIEW c "
+      from_sql=" from #{template.query_view} v, \"#{combination[:code]}\" c "
       where_sql=" where v.COMBINATION_RECORD = c.COMBINATION_RECORD"
-      valueIds={}
       if values
-        values.each do |v|
-          headerValue=Dip::HeaderValue.find(v)
-          valueIds["#{headerValue.header_id}"]=v
+        Dip::CommonModel.find_by_sql("select t1.CODE,t2.HEADER_ID,t2.\"ID\" from"+
+        " DIP_HEADER t1,DIP_HEADER_VALUE t2  where t1.\"ID\"=t2.HEADER_ID and t2.\"ID\" in(#{values.collect{ |x| "'#{x}'" }.join(",")})").each do|h|
+          where_sql << " and c.\"#{h[:code].to_s.upcase}\"='#{h[:id]}'"
         end
       end
-      headers=Dip::CombinationHeader.where(:combination_id => template.combination_id)
-      n=1
-      headers.each do |h|
-        sql_select << ",v#{n}.value \"DIP#{h.header_id.to_s.upcase}\""
-        from_sql << ",dip_header_value v#{n}"
-        where_sql << " and c.DIP#{h.header_id.to_s.upcase}=v#{n}.id"
-        if valueIds["#{h.header_id}"]
-          where_sql << " and c.DIP#{h.header_id.to_s.upcase}='#{valueIds[h.header_id]}'"
-        else
-          authorized=Dip::DipAuthority.get_all_authorized_value_data(Irm::Person.current.id, Dip::DipConstant::AUTHORITY_PERSON, Dip::DipConstant::AUTHORITY_VALUE, h.header_id).collect { |v| "'"+v.function+"'" }.join(",")
-          if authorized.size < 1
-            authorized='-1'
-          end
-          where_sql << " and c.DIP#{h.header_id.to_s.upcase} in (#{authorized})"
-        end
-        n+=1
+      Dip::CombinationHeader.find_by_sql("select t1.HEADER_ID,t2.CODE from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{template[:combination_id]}'").each_with_index  do |h,i|
+        sql_select << ",c.\"#{h[:code].to_s.upcase}\""
+        sql_select << ",c.\"#{h[:code].to_s.upcase}_V\""
+        from_sql << ",DIP_AUTHORITYXES auth#{i}"
+        where_sql << " and auth#{i}.function=c.\"#{h[:code].to_s.upcase}\" and auth#{i}.function_type='VALUE'"
       end
       sql = sql_select
       sql << from_sql
       sql << where_sql
     else
       sql="select v.* from #{template.query_view} v where 1=1 "
-    end
-    if order
-      sql << " order by #{order.upcase}"
-    end
-    return sql
-  end
-
-  def get_data_edit_sql(order, template, values)
-    if template.combination_id
-      sql_select= "select v.rowid row_id,v.*"
-      from_sql=" from #{template.table_name} v, DIP#{template.combination_id.to_s.upcase}_VIEW c "
-      where_sql=" where v.COMBINATION_RECORD = c.COMBINATION_RECORD"
-      valueIds={}
-      if values
-        values.values.each do |v|
-          headerValue=Dip::HeaderValue.find(v)
-          valueIds["#{headerValue.header_id}"]=v
-        end
-      end
-      headers=Dip::CombinationHeader.where(:combination_id => template.combination_id)
-      n=1
-      headers.each do |h|
-        sql_select << ",v#{n}.value \"DIP#{h.header_id.to_s.upcase}\""
-        from_sql << ",dip_header_value v#{n}"
-        where_sql << " and c.DIP#{h.header_id.to_s.upcase}=v#{n}.id"
-        if valueIds["#{h.header_id}"]
-          where_sql << " and c.DIP#{h.header_id.to_s.upcase}='#{valueIds[h.header_id]}'"
-        else
-          authorized=Dip::DipAuthority.get_all_authorized_value_data(Irm::Person.current.id, Dip::DipConstant::AUTHORITY_PERSON, Dip::DipConstant::AUTHORITY_VALUE, h.header_id).collect { |v| "'"+v.function+"'" }.join(",")
-          if authorized.size < 1
-            authorized='-1'
-          end
-          where_sql << " and c.DIP#{h.header_id.to_s.upcase} in (#{authorized})"
-        end
-        n+=1
-      end
-      sql = sql_select
-      sql << from_sql
-      sql << where_sql
-    else
-      sql="select v.*,rowid row_id from #{template.table_name} v where 1=1 "
     end
     if order
       sql << " order by #{order.upcase}"

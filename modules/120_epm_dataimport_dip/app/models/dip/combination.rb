@@ -46,43 +46,35 @@ class Dip::Combination < ActiveRecord::Base
     end
    end
   def self.get_combination_record(valueIds, combination_id)
-    if combination_id.nil?
+    combination=Dip::Combination.where({:id=>combination_id}).first
+    if combination.nil?
       return nil
     end
-    headers=Dip::CombinationHeader.where(:combination_id => combination_id).order("header_id")
+    headers=Dip::CombinationHeader.find_by_sql("select t1.COMBINATION_ID,t1.HEADER_ID,t2.CODE,t2.\"NAME\" from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{combination[:id]}' order by header_id")
     if valueIds.nil? || headers.size != valueIds.size
       return nil
     end
-    sql = "select * from DIP#{combination_id.to_s.upcase}_VIEW where \"ENABLED\"=1 "
+    sql = "select * from \"#{combination[:code].to_s.upcase}\" where \"ENABLED\"=1 "
     i=0
     headers.each do |h|
-      sql << " and DIP"
-      sql << h.header_id.to_s.upcase
-      sql << "='"
-      sql << valueIds[i].to_s
-      sql << "'"
+      sql << " and \"#{h[:code].to_s.upcase}\"='#{valueIds[i].to_s}'"
       i+=1
     end
     Dip::CombinationRecord.find_by_sql(sql).first
   end
 
   def self.get_enabled_combination_record(valueIds, combination_id)
-    if combination_id.nil?
+    combination=Dip::Combination.where({:id=>combination_id}).first
+    if combination.nil?
       return nil
     end
-    headers=Dip::CombinationHeader.where(:combination_id => combination_id).order("header_id")
+    headers=Dip::CombinationHeader.find_by_sql("select t1.COMBINATION_ID,t1.HEADER_ID,t2.CODE,t2.\"NAME\" from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{combination[:id]}' order by header_id")
     if valueIds.nil? || headers.size != valueIds.size
       return nil
     end
-    sql = "select * from DIP#{combination_id.to_s.upcase}_VIEW where \"ENABLED\"=1 "
-    i=0
+    sql = "select * from \"#{combination[:code].to_s.upcase}\" where \"ENABLED\"=1 "
     headers.each do |h|
-      sql << " and DIP"
-      sql << h.header_id.to_s.upcase
-      sql << "='"
-      sql << valueIds[h.header_id]
-      sql << "'"
-      i+=1
+      sql << " and \"#{h[:code].to_s.upcase}\"='#{valueIds[h[:header_id]]}'"
     end
     Dip::CombinationRecord.find_by_sql(sql).first
   end

@@ -2,8 +2,8 @@
     <% builder.column(:id, {:title => "<input type=\"checkbox\" id=\"selectAll\"/>"+t(:selectAll), :width => "30px"}) do |data| %>
         <input type="checkbox" name="combinationIds" value="<%= data[:id] %>"/>
     <% end %>
-    <% Dip::CombinationHeader.where(:combination_id => @combinationId).order("header_id").each do |h| %>
-        <% builder.column("dip"+h.header_id.to_s.downcase, {:title => Dip::Header.find(h.header_id).name, :width => "140px"})%>
+    <% Dip::CombinationHeader.find_by_sql("select t2.CODE,t2.\"NAME\" from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{@combinationId}' order by t1.header_id").each do |h| %>
+        <% builder.column("#{h[:code].to_s.downcase}_v", {:title => h[:name], :width => "140px"})%>
     <% end %>
 
     <% builder.column(:enabled, {:title => t(:status), :width => "80px", :searchable => true}) do |data| %>

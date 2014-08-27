@@ -56,6 +56,7 @@ class Dip::DipAuthorityController < ApplicationController
       values= values.match_value("value", params[:value])
       datas, count=paginate(values)
     end
+    syncAuthority()
     respond_to do |format|
       format.html {
         @datas = datas
@@ -92,6 +93,7 @@ class Dip::DipAuthorityController < ApplicationController
       valueIds.each do |v|
         Dip::DipAuthority.where({:id => v, :target => targetId}).first.destroy
       end
+      syncAuthority()
     end
     respond_to do |format|
       format.json {
@@ -154,6 +156,7 @@ class Dip::DipAuthorityController < ApplicationController
                                          :function => v,
                                          :function_type => Dip::DipConstant::AUTHORITY_TEMPLATE})
         authority.save
+        syncAuthority()
       end
     end
     respond_to do |format|
@@ -161,6 +164,50 @@ class Dip::DipAuthorityController < ApplicationController
         render :json => nil
       }
     end
+  end
+  def syncAuthority
+    Dip::DipAuthority.mutex().lock
+    version=UUID.new.generate(:compact)
+    ActiveRecord::Base.connection().execute("update dip_authorityxes t set t.version=null")
+    Dip::DipAuthority.all.each do |data|
+      if data[:target_type]=="GROUP"
+        syncGroup(data[:target],data,version)
+      else
+        old_record=Dip::Authorityx.where({:person_id=>data[:target],
+                               :function=>data[:function],
+                               :function_type=>data[:function_type]}).first
+        if old_record
+          old_record.update_attributes({:version=>version})
+        else
+          Dip::Authorityx.new({:person_id=>data[:target],
+                               :function_type=>data[:function_type],
+                               :function=>data[:function],
+                               :version=>version}).save
+        end
+      end
+
+    end
+    ActiveRecord::Base.connection().execute("delete from dip_authorityxes t where t.version is null")
+    Dip::DipAuthority.mutex().unlock
+  end
+  def syncGroup(groupId,data,version)
+    Irm::Person.where({:organization_id => groupId, :status_code => "ENABLED"}).each do |p|
+      old_record=Dip::Authorityx.where({:person_id=>p[:id],
+                                        :function=>data[:function],
+                                        :function_type=>data[:function_type]}).first
+      if old_record
+        old_record.update_attributes({:version=>version})
+      else
+        Dip::Authorityx.new({:person_id=>p[:id],
+                             :function_type=>data[:function_type],
+                             :function=>data[:function],
+                             :version=>version}).save
+      end
+    end
+    Irm::Organization.where(:parent_org_id=>groupId).each do |org|
+      syncGroup(org[:id],data,version)
+    end
+
   end
 
   # Report
@@ -220,6 +267,7 @@ class Dip::DipAuthorityController < ApplicationController
         authority.save
       end
     end
+    syncAuthority()
     respond_to do |format|
       format.json {
         render :json => nil
@@ -284,6 +332,7 @@ class Dip::DipAuthorityController < ApplicationController
         authority.save
       end
     end
+    syncAuthority()
     respond_to do |format|
       format.json {
         render :json => nil
@@ -348,6 +397,7 @@ class Dip::DipAuthorityController < ApplicationController
         authority.save
       end
     end
+    syncAuthority()
     respond_to do |format|
       format.json {
         render :json => nil

@@ -11,34 +11,27 @@ class Dip::CombinationController < ApplicationController
   def get_data
     data=[]
     count=0
-    if (params[:combinationId]&&params[:combinationId].to_s.size>0&&params[:combinationId]!="null")
+    combination=Dip::Combination.where({:id => params[:combinationId]}).first
+    if (combination)
       headerValueIds=params[:headerValueIds]
       start=params[:start].to_i
       limit=params[:limit].to_i
       sql_select="select v.combination_record \"id\",v.enabled,r.updated_by,r.updated_at"
-      sql_from=" from dip_combination c,DIP#{params[:combinationId]}_VIEW v,dip_combination_records r"
-      sql_where=" where c.id = '#{params[:combinationId]}' and r.combination_id=c.id and r.id=v.combination_record"
+      sql_from=" from \"#{combination[:code].to_s.upcase}\" v,dip_combination_records r"
+      sql_where=" where r.combination_id='#{params[:combinationId]}' and r.id=v.combination_record"
       sql_order=" order by r.updated_at desc"
-      values={}
-      if (headerValueIds)
-        headerValueIds.each do |v|
-          header_value=Dip::HeaderValue.find(v)
-          values[header_value.header_id]=v
-        end
+      Dip::CombinationHeader.find_by_sql("select t1.COMBINATION_ID,t1.HEADER_ID,t2.CODE,t2.\"NAME\" from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{combination[:id]}'").each do |h|
+        sql_select << ",v.#{h[:code].to_s.upcase}_V"
+        sql_order << ",v.#{h[:code].to_s.upcase}_V"
       end
-      i=1
-      Dip::CombinationHeader.where(:combination_id => params[:combinationId]).order("header_id").each do |h|
-        sql_select << ",v#{i}.value \"DIP#{h.header_id.to_s.upcase}\""
-        sql_from << ",dip_header_value v#{i}"
-        sql_where << " and v.DIP#{h.header_id.to_s.upcase}=v#{i}.id and v#{i}.enabled=1"
-        sql_order << ",v#{i}.value"
-        if values[h.header_id]
-          sql_where << " and v.DIP#{h.header_id.to_s.upcase}='#{values[h.header_id]}'"
+      if headerValueIds
+        Dip::CommonModel.find_by_sql("SELECT t2.CODE,t1.\"ID\" FROM DIP_HEADER_VALUE t1,DIP_HEADER t2 WHERE t1.HEADER_ID = t2.\"ID\" and t1.\"ID\" in (#{headerValueIds.collect { |x| "'#{x}'" }.join(",")})").each do |data|
+          sql_where << " and v.\"#{data[:code].to_s.upcase}\"='#{data[:id]}'"
         end
-        i+=1
       end
       sql=sql_select+sql_from+sql_where+sql_order
-      data = Dip::CombinationRecord.find_by_sql(Dip::Utils.paginate(sql,start,limit))
+      p sql
+      data = Dip::CombinationRecord.find_by_sql(Dip::Utils.paginate(sql, start, limit))
       count=Dip::Utils.get_count(sql)
     end
     respond_to do |format|
@@ -54,7 +47,8 @@ class Dip::CombinationController < ApplicationController
     result={:success => true}
     headerIds=params[:headerIds]
     name=params[:name]
-    combination_new=Dip::Combination.new({:name => name})
+    code=params[:code]
+    combination_new=Dip::Combination.new({:name => name, :code => code})
     if (combination_new.save)
       begin
         list={}
@@ -131,6 +125,7 @@ class Dip::CombinationController < ApplicationController
     end
     connection.commit
   end
+
   def enable
     result={:success => true}
     ids = []
@@ -252,15 +247,16 @@ class Dip::CombinationController < ApplicationController
 
   def generateView(id)
     combination=Dip::Combination.find(id)
-    headers=Dip::CombinationHeader.where(:combination_id => combination.id).collect { |h| h.header_id }
-    sql="create or replace view DIP#{id.to_s.upcase}_VIEW as "
+    headers=Dip::CombinationHeader.find_by_sql("select t1.COMBINATION_ID,t1.HEADER_ID,t2.CODE,t2.\"NAME\" from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{combination[:id]}'")
+    sql="create or replace view #{combination[:code].to_s.upcase} as "
     sql_select=" select r.id \"COMBINATION_RECORD\",r.enabled"
     sql_from=" from dip_combination_records r"
     sql_where=" where r.combination_id='#{id}'"
     (1..headers.size).each do |i|
-      sql_select << ",i#{i}.header_value_id \"DIP#{headers[i-1].to_s.upcase}\""
+      sql_select << ",i#{i}.header_value_id \"#{(headers[i-1])[:code].to_s.upcase}\""
+      sql_select << ",v#{i}.\"VALUE\" \"#{(headers[i-1])[:code].to_s.upcase}_V\""
       sql_from << ",dip_combination_items i#{i},dip_header_value v#{i}"
-      sql_where << " and i#{i}.combination_record_id=r.id  and i#{i}.header_value_id=v#{i}.id and v#{i}.header_id='#{headers[i-1]}' "
+      sql_where << " and i#{i}.combination_record_id=r.id  and i#{i}.header_value_id=v#{i}.id and v#{i}.header_id='#{headers[i-1][:header_id]}' "
     end
     sql << sql_select
     sql << sql_from

@@ -112,7 +112,7 @@
         }
         if (selectedIds.length > 0) {
             $.post("<%= url_for({:action => :create,:controller => "dip/combination",:format=>:json})%>",
-                    {headerIds:selectedIds, name:$("#combination_name").val()}, function (result) {
+                    {headerIds:selectedIds, name:$("#combination_name").val(),code:$("#combination_code").val()}, function (result) {
                         if (result.success) {
                             showFadeBackMessage("combination_index_msg", result.msg);
                             $("#create_modal").modal("hide");

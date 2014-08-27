@@ -5,33 +5,48 @@ module Dip::TemplateHelper
 
   def getInitList(headerId,templateId)
     res=[]
-    authorized_value=Dip::DipAuthority.get_all_authorized_value_data(Irm::Person.current.id, Dip::DipConstant::AUTHORITY_PERSON,
-                                                                     Dip::DipConstant::AUTHORITY_VALUE, headerId).collect { |v| "'"+v.function+"'" }.join(",")
-    if !authorized_value.nil? && authorized_value.size > 0
-	  template=Dip::Template.find(params[:id])
-	  combination=template.combination_id
-	  sql="select distinct DIP#{headerId.to_s.upcase} from DIP#{combination.to_s.upcase}_VIEW where enabled=1 and DIP#{headerId.to_s.upcase} in (#{authorized_value})"
-	  authorized_value=Dip::CommonModel.find_by_sql(sql).collect{|v|"'"+v["dip#{headerId.to_s.downcase}"]+"'"}.join(",")
-	  headerValues=[]
-	  if !authorized_value.nil? && authorized_value.size > 0
-		headerValues=Dip::HeaderValue.find_by_sql("select distinct t.* from dip_header_value t where t.\"ENABLED\"=1 and t.id in (#{authorized_value}) order by t.code")
-	  end
+    template=Dip::Template.where(:id=>templateId).first
+		headerValues=Dip::HeaderValue.find_by_sql("SELECT DISTINCT"+
+                                                 " t2. ID,"+
+                                                 " t2.CODE,"+
+                                                 " t2.\"VALUE\""+
+                                               " FROM"+
+                                                 " DIP_AUTHORITYXES t1,"+
+                                                 " DIP_HEADER_VALUE t2,"+
+                                                 " DIP_COMBINATION_RECORDS t3,"+
+                                                 " DIP_COMBINATION_ITEMS t4"+
+                                               " WHERE"+
+                                                 " t1.FUNCTION_TYPE = 'VALUE'"+
+                                               " AND t1.PERSON_ID = '#{Irm::Person.current.id}'"+
+                                               " AND t1.\"FUNCTION\" = t2.\"ID\""+
+                                               " AND t4.HEADER_VALUE_ID=t2.\"ID\""+
+                                               " AND t3.COMBINATION_ID = '#{template[:combination_id]}'"+
+                                               " AND t3.enabled = 1"+
+                                               " AND t2.HEADER_ID = '#{headerId}'"+
+                                               " AND t4.COMBINATION_RECORD_ID=T3.\"ID\" order by t2.code")
       unless headerValues.empty?
         res = headerValues.collect { |v| [v.value, v.id] }
       end
-    end
     return res
   end
 
   def getInitValueList(headerId)
     res=[]
-    authorized_value=Dip::DipAuthority.get_all_authorized_value_data(Irm::Person.current.id, Dip::DipConstant::AUTHORITY_PERSON,
-                                                                     Dip::DipConstant::AUTHORITY_VALUE, headerId).collect { |v| "'"+v.function+"'" }.join(",")
-    if !authorized_value.nil? && authorized_value.size > 0
-      headerValues=Dip::HeaderValue.find_by_sql("select distinct t.* from dip_header_value t where t.id in (#{authorized_value}) order by t.code")
-      unless headerValues.empty?
-        res = headerValues.collect { |v| [v.value, v.id] }
-      end
+    headerValues=Dip::HeaderValue.find_by_sql("SELECT DISTINCT"+
+                                              "    t2. ID,"+
+                                              "    t2.CODE,"+
+                                              "    t2.\"VALUE\""+
+                                              "  FROM"+
+                                              "    DIP_AUTHORITYXES t1,"+
+                                              "    DIP_HEADER_VALUE t2"+
+                                              "  WHERE"+
+                                              "    t1.FUNCTION_TYPE = 'VALUE'"+
+                                              "  AND t1.PERSON_ID = '#{Irm::Person.current.id}'"+
+                                              "  AND t1.\"FUNCTION\" = t2.\"ID\""+
+                                              "  AND t2.HEADER_ID = '#{headerId}'"+
+                                              "  order by t2.CODE")
+    unless headerValues.empty?
+      res = headerValues.collect { |v| [v.value, v.id] }
     end
     return res
   end
