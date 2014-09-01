@@ -234,7 +234,7 @@
         var values = {}
         for (var n in headers) {
             if ($("#key_" + n).val() && $.trim($("#key_" + n).val().toString()).length > 0) {
-                values[headers[n]] = $("#key_" + n).val();
+                values[n] = $("#key_" + n).val();
             }
         }
         $.post("<%= url_for({:action=>:submit_data,:controller=>"/dip/template",:format=>"json"})%>", {

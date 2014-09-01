@@ -83,23 +83,23 @@ class Dip::TemplateController < ApplicationController
       order=order_name +" "+order_value
     end
     category_id=params[:category_id]
-      sql="select t1.* from DIP_TEMPLATE t1,DIP_AUTHORITYXES t2 where t1.\"ID\"=t2.\"FUNCTION\" and t2.FUNCTION_TYPE='TEMPLATE' and t2.PERSON_ID='#{Irm::Person.current.id}'"
-      if category_id
-        categories=Dip::DipCategory.get_all_child(category_id)
-        sql << " and  t1.template_category_id in (#{categories.collect{|c|"'#{c}'"}.join(",")})"
-      else
-        sql << ' and  t1.template_category_id is null'
-      end
-      if params[:name]
-        sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:name])}%') "
-      elsif params[:code]
-        sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:code])}%') "
-      elsif params[:descs]
-        sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:descs])}%') "
-      end
-      sql << " order by t1.#{order} "
-      templates=Dip::Template.find_by_sql(Dip::Utils.paginate(sql, start, limit))
-      count=Dip::Utils.get_count(sql)
+    sql="select t1.* from DIP_TEMPLATE t1,DIP_AUTHORITYXES t2 where t1.\"ID\"=t2.\"FUNCTION\" and t2.FUNCTION_TYPE='TEMPLATE' and t2.PERSON_ID='#{Irm::Person.current.id}'"
+    if category_id
+      categories=Dip::DipCategory.get_all_child(category_id)
+      sql << " and  t1.template_category_id in (#{categories.collect { |c| "'#{c}'" }.join(",")})"
+    else
+      sql << ' and  t1.template_category_id is null'
+    end
+    if params[:name]
+      sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:name])}%') "
+    elsif params[:code]
+      sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:code])}%') "
+    elsif params[:descs]
+      sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:descs])}%') "
+    end
+    sql << " order by t1.#{order} "
+    templates=Dip::Template.find_by_sql(Dip::Utils.paginate(sql, start, limit))
+    count=Dip::Utils.get_count(sql)
 
     respond_to do |format|
       format.html {
@@ -117,7 +117,7 @@ class Dip::TemplateController < ApplicationController
         view_columns=Dip::CommonModel.find_by_sql("select column_name from user_tab_columns where upper(table_name)=upper('#{@template.query_view}') order by column_id").collect { |c| c.column_name }
         i=1
         while row=columns.fetch
-          unless ["ID", "CREATED_AT", "CREATED_BY","BATCH_ID", "COMBINATION_RECORD", "UPDATED_AT", "UPDATED_BY"].include? row[0].to_s.upcase
+          unless ["ID", "CREATED_AT", "CREATED_BY", "BATCH_ID", "COMBINATION_RECORD", "UPDATED_AT", "UPDATED_BY"].include? row[0].to_s.upcase
             templateColumn=Dip::TemplateColumn.new
             templateColumn[:name]=row[0]
             templateColumn[:column_name]=row[0]
@@ -205,27 +205,31 @@ class Dip::TemplateController < ApplicationController
             if (template.combination_id)
               logger.info("-------with combination---------")
               combination_record= Dip::Combination.get_combination_record(params[:key].values, template.combination_id)
+
               if (combination_record)
-                authorized=true
-                params[:key].values.each do |v|
-                  unless Dip::DipAuthority.authorized?(Irm::Person.current.id, v)
-                    authorized=false
-                    break
+                if template_submitted?(template[:id], combination_record[:combination_record])
+                  flash[:errors] << t(:label_combination_submitted)
+                else
+                  authorized=true
+                  params[:key].values.each do |v|
+                    unless Dip::DipAuthority.authorized?(Irm::Person.current.id, v)
+                      authorized=false
+                      break
+                    end
+                  end
+                  if authorized
+                    combination_record_id=combination_record.combination_record
+                    file=Dip::Template.upload_file(params[:file][:file])
+                    batchId=UUID.generate.to_s.gsub('-', '')
+                    Dip::ImportManagement.new({:batch_id => batchId, :status => Dip::ImportStatus::STATUS[:importing_to_tmp], :template_id => params[:id], :percent => 0, :combination_record_id => combination_record_id}).save
+                    #thread=Thread.new { Dip::HandDataImport.new().hand_data_import(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob)}
+                    #thread.run
+                    #POOL.execute { Dip::HandDataImport.new().hand_data_import(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob) }
+                    Delayed::Job.enqueue(Dip::Jobs::ImportDataToTmpTableJob.new(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob))
+                  else
+                    flash[:errors] << t(:label_not_authorized)
                   end
                 end
-                if authorized
-                  combination_record_id=combination_record.combination_record
-                  file=Dip::Template.upload_file(params[:file][:file])
-                  batchId=UUID.generate.to_s.gsub('-', '')
-                  Dip::ImportManagement.new({:batch_id => batchId, :status => Dip::ImportStatus::STATUS[:importing_to_tmp], :template_id => params[:id], :percent => 0, :combination_record_id => combination_record_id}).save
-                  #thread=Thread.new { Dip::HandDataImport.new().hand_data_import(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob)}
-                  #thread.run
-                  #POOL.execute { Dip::HandDataImport.new().hand_data_import(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob) }
-                  Delayed::Job.enqueue(Dip::Jobs::ImportDataToTmpTableJob.new(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob))
-                else
-                  flash[:errors] << t(:label_not_authorized)
-                end
-
               else
                 flash[:errors] << t(:combination_not_right)
               end
@@ -238,6 +242,7 @@ class Dip::TemplateController < ApplicationController
               #thread.run
               #POOL.execute { Dip::HandDataImport.new().hand_data_import(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob) }
               Delayed::Job.enqueue(Dip::Jobs::ImportDataToTmpTableJob.new(file, params[:id], batchId, Irm::Person.current, combination_record_id, isBatchJob))
+
             end
           else
             flash[:error] << t(:template_not_found)
@@ -264,8 +269,8 @@ class Dip::TemplateController < ApplicationController
   def next_value_list
     valueIds=params[:valueIds]
     templateId=params[:templateId]
-    template=Dip::Template.where(:id=>templateId).first
-    combination=Dip::Combination.where(:id=>template[:combination_id]).first
+    template=Dip::Template.where(:id => templateId).first
+    combination=Dip::Combination.where(:id => template[:combination_id]).first
     headers=Dip::CombinationHeader.find_by_sql("SELECT t2.\"ID\",t2.CODE,t2.\"NAME\" FROM DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 WHERE t2.\"ID\" = t1.HEADER_ID AND t1.COMBINATION_ID = '#{template[:combination_id]}' ORDER BY t1.HEADER_ID")
     sql="select distinct t1.\"#{headers[valueIds.length][:code].to_s.upcase}_V\" \"VALUE\",t1.\"#{headers[valueIds.length][:code].to_s.upcase}\" \"ID\" from \"#{combination[:code]}\" t1,DIP_AUTHORITYXES t2 where t1.enabled=1 and t2.function_type='VALUE' "
     sql << " and t2.person_id='#{Irm::Person.current.id}' and t1.\"#{headers[valueIds.length][:code].to_s.upcase}\"=t2.function"
@@ -278,7 +283,7 @@ class Dip::TemplateController < ApplicationController
     values=ActiveRecord::Base.connection().execute(sql)
     returnValue=[["", ""]]
     while (row=values.fetch)
-        returnValue<<row
+      returnValue<<row
     end
     respond_to do |format|
       format.html {
@@ -566,53 +571,55 @@ class Dip::TemplateController < ApplicationController
     result={:flag => true}
     template_id=params[:templateId]
     valueIds=params[:valueIds]
-    template=Dip::Template.where(:id=>template_id).first
-    combination=Dip::Combination.where(:id=>template[:combination_id]).first
+    p '--------------------------------------------'
+    p "select t1.*,UPPER(t2.CODE) from DIP_HEADER_VALUE t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.\"ID\" in (#{valueIds.collect { |x| "'#{x[1]}'" }.join(",")})"
+    template=Dip::Template.where(:id => template_id).first
+    combination=Dip::Combination.where(:id => template[:combination_id]).first
     if combination
       #With Combination
       sql="select * from \"#{combination[:code].to_s.upcase}\" where 1=1"
-      Dip::HeaderValue.find_by_sql("select t1.*,UPPER(t2.CODE) from DIP_HEADER_VALUE t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.\"ID\" in (#{valueIds.collect { |x| "'#{x}'" }.join(",")})").each do|h|
-        sql << " and \"#{h[:code]}\"='#{h[:id]}'"
+      Dip::HeaderValue.find_by_sql("select t1.*,UPPER(t2.CODE) \"HEADER_CODE\" from DIP_HEADER_VALUE t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.\"ID\" in (#{valueIds.collect { |x| "'#{x[1]}'" }.join(",")})").each do |h|
+        sql << " and \"#{h[:header_code]}\"='#{h[:id]}'"
       end
       combination_record=Dip::CommonModel.find_by_sql(sql).first
-      if template_submitted?(template_id,combination_record[:combination_record])
+      if template_submitted?(template_id, combination_record[:combination_record])
         result[:flag]=false
         result[:msg]=[t(:label_combination_submitted)]
       else
-        apporvalStatus=Dip::ApprovalStatus.where({:template_id=>template_id,:combination_record=>combination_record[:combination_record]}).first
+        apporvalStatus=Dip::ApprovalStatus.where({:template_id => template_id, :combination_record => combination_record[:combination_record]}).first
         if apporvalStatus
-          apporvalStatus.update_attributes({:approval_status=>"PROCESSING"})
+          apporvalStatus.update_attributes({:approval_status => "PROCESSING"})
         else
-          Dip::ApprovalStatus.new({:combination_record=>combination_record[:combination_record],
-                                   :template_id=>template_id,
-                                   :approval_status=>"PROCESSING"}).save
+          Dip::ApprovalStatus.new({:combination_record => combination_record[:combination_record],
+                                   :template_id => template_id,
+                                   :approval_status => "PROCESSING"}).save
         end
-        plsql.hdm_common_approval.generate_node(:personid=>Irm::Person.current.id,
-                                                :templateid=>template_id,
-                                                :combinationrecord=>combination_record[:combination_record],
-                                                :icommiter=>Irm::Person.current.id,
-                                                :cur_node_id=>nil)
+        plsql.hdm_common_approval.generate_node(:personid => Irm::Person.current.id,
+                                                :templateid => template_id,
+                                                :combinationrecord => combination_record[:combination_record],
+                                                :icommiter => Irm::Person.current.id,
+                                                :cur_node_id => nil)
         result[:msg]=[t(:submit_successful)]
       end
     else
       #No Combination
-      if template_submitted?(template_id,nil)
+      if template_submitted?(template_id, nil)
         result[:flag]=false
         result[:msg]=[t(:label_combination_submitted)]
       else
-        apporvalStatus=Dip::ApprovalStatus.where({:template_id=>template_id,:combination_record=>nil}).first
+        apporvalStatus=Dip::ApprovalStatus.where({:template_id => template_id, :combination_record => nil}).first
         if apporvalStatus
-          apporvalStatus.update_attributes({:approval_status=>"PROCESSING"})
+          apporvalStatus.update_attributes({:approval_status => "PROCESSING"})
         else
-          Dip::ApprovalStatus.new({:combination_record=>nil,
-                                   :template_id=>template_id,
-                                   :approval_status=>"PROCESSING"}).save
+          Dip::ApprovalStatus.new({:combination_record => nil,
+                                   :template_id => template_id,
+                                   :approval_status => "PROCESSING"}).save
         end
-        plsql.hdm_common_approval.generate_node(:personid=>Irm::Person.current.id,
-                                                :templateid=>template_id,
-                                                :combinationrecord=>nil,
-                                                :icommiter=>Irm::Person.current.id,
-                                                :cur_node_id=>nil)
+        plsql.hdm_common_approval.generate_node(:personid => Irm::Person.current.id,
+                                                :templateid => template_id,
+                                                :combinationrecord => nil,
+                                                :icommiter => Irm::Person.current.id,
+                                                :cur_node_id => nil)
         result[:msg]=[t(:submit_successful)]
       end
     end
@@ -638,17 +645,17 @@ class Dip::TemplateController < ApplicationController
 
   def get_query_sql(order, template, values)
     if template.combination_id
-      combination=Dip::Combination.where(:id=>template[:combination_id]).first
+      combination=Dip::Combination.where(:id => template[:combination_id]).first
       sql_select= "select v.*"
       from_sql=" from #{template.query_view} v, \"#{combination[:code]}\" c "
       where_sql=" where v.COMBINATION_RECORD = c.COMBINATION_RECORD"
       if values
         Dip::CommonModel.find_by_sql("select t1.CODE,t2.HEADER_ID,t2.\"ID\" from"+
-        " DIP_HEADER t1,DIP_HEADER_VALUE t2  where t1.\"ID\"=t2.HEADER_ID and t2.\"ID\" in(#{values.collect{ |x| "'#{x}'" }.join(",")})").each do|h|
+                                         " DIP_HEADER t1,DIP_HEADER_VALUE t2  where t1.\"ID\"=t2.HEADER_ID and t2.\"ID\" in(#{values.collect { |x| "'#{x}'" }.join(",")})").each do |h|
           where_sql << " and c.\"#{h[:code].to_s.upcase}\"='#{h[:id]}'"
         end
       end
-      Dip::CombinationHeader.find_by_sql("select t1.HEADER_ID,t2.CODE from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{template[:combination_id]}'").each_with_index  do |h,i|
+      Dip::CombinationHeader.find_by_sql("select t1.HEADER_ID,t2.CODE from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{template[:combination_id]}'").each_with_index do |h, i|
         sql_select << ",c.\"#{h[:code].to_s.upcase}\""
         sql_select << ",c.\"#{h[:code].to_s.upcase}_V\""
         from_sql << ",DIP_AUTHORITYXES auth#{i}"
@@ -742,12 +749,13 @@ class Dip::TemplateController < ApplicationController
     end
   end
 
-  def template_submitted?(template_id,combination_id)
-    apporvalStatus=Dip::ApprovalStatus.where({:template_id=>template_id,:combination_record=>combination_id}).first
-      if apporvalStatus&&apporvalStatus[:approval_status]!='REJECT'
-        return true
-      else
-        return false
-      end
+  def template_submitted?(template_id, combination_id)
+    apporvalStatus=Dip::ApprovalStatus.where({:template_id => template_id, :combination_record => combination_id}).first
+    p apporvalStatus.to_json
+    if apporvalStatus&&apporvalStatus[:approval_status]!='REJECT'
+      return true
+    else
+      return false
+    end
   end
 end
