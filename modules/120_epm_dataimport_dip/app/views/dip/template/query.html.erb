@@ -16,6 +16,7 @@
         <input type="hidden" value="<%= params[:id] %>" id="templateId"/>
         <button onclick="show_export_dialog(event)" class="btn btn-primary"><%= t(:export) %></button>
         <%= link_to(t(:import), {:controller => "dip/template", :action => "import", :id => params[:id]}, :class => "btn btn-primary") %>
+        <button class="btn btn-primary" onclick="submit_data(event)"><%= t(:submit) %></button>
         <!--<button class="btn btn-primary" onclick="create_data(event)"><%= t(:add) %></button>
         <button class="btn btn-primary" onclick="save_data(event)"><%= t(:save) %></button>-->
         <%= link_to t(:back), {:action => :index, :controller => "dip/template"}, :class => "btn btn-primary" %>
@@ -222,6 +223,25 @@
         else {
             showFadeBackMessage("edit_template_data_msg", ["<%= t(:no_data_to_save)%>"]);
         }
+    }
+    function submit_data(event){
+        for (var n in headers) {
+            if ($("#key_" + n).val() == undefined || $.trim($("#key_" + n).val().toString()).length < 1) {
+                showFadeBackMessage("edit_template_data_msg", ["<%= t(:notice_select_combination)%>"]);
+                return;
+            }
+        }
+        var values = {}
+        for (var n in headers) {
+            if ($("#key_" + n).val() && $.trim($("#key_" + n).val().toString()).length > 0) {
+                values[headers[n]] = $("#key_" + n).val();
+            }
+        }
+        $.post("<%= url_for({:action=>:submit_data,:controller=>"/dip/template",:format=>"json"})%>", {
+            valueIds:values, templateId:$("#cur_template_id").val()
+        }, function (result) {
+            showFadeBackMessage("edit_template_data_msg", result.msg);
+        })
     }
 </script>
 

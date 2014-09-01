@@ -397,6 +397,27 @@ Fwk::MenuAndFunctionManager.map do |map|
   }
 #=================================END:Header Manage=================================
 
+#=================================START:Approval=================================
+  map.function_group :approval_manage, {
+      :en => {:name => "Approval Manage", :description => "Approval Manage"},
+      :zh => {:name => "审批管理", :description => "审批管理"}, }
+  map.function_group :approval_manage, {
+      :zone_code => "DIP_MANAGEMENT",
+      :controller => "dip/approval_status",
+      :action => "index"}
+  map.function_group :approval_manage, {
+      :children => {
+          :approval_manage => {
+              :en => {:name => "Approval Manage", :description => "Approval Manage"},
+              :zh => {:name => "审批管理", :description => "审批管理"},
+              :default_flag => "N",
+              :login_flag => "N",
+              :public_flag => "N",
+          },
+      }
+  }
+#=================================END:Approval=================================
+
   map.function :combination_manage, {"dip/combination" => ["index", "getHeaderList", "rename", "delete", "get_data", "create", "destroy", "enable", "in_process", "close"]}
 
   map.function :value_set_manage, {"dip/header_value" => ["index", "get_data", "create", "destroy", "update", "enable", "disable"]}
@@ -410,7 +431,7 @@ Fwk::MenuAndFunctionManager.map do |map|
 
   map.function :validation_manage, {"dip/validation" => ["get_data", "new", "edit", "create", "update", "destroy", "index"]}
 
-  map.function :epm_data_import, {"dip/template" => ["can_create_data","get_ahead_data", "save_data", "index", "query", "export_data", "get_query_data", "next_value_list", "show", "import", "export", "get_data", "upload", "get_data_authorized"]}
+  map.function :epm_data_import, {"dip/template" => ["can_create_data","get_ahead_data", "save_data", "index", "query", "export_data", "get_query_data", "next_value_list", "show", "import", "export", "get_data", "upload", "get_data_authorized","submit_data"]}
   map.function :epm_data_import_status, {"dip/import_management" => ["index", "get_data", "destroy", "query",  "get_query_data", "export_data"]}
   map.function :epm_data_import_status, {"dip/error" => ["index", "get_data"]}
 
@@ -450,6 +471,7 @@ Fwk::MenuAndFunctionManager.map do |map|
 
   map.function :dip_run_informatica, {"dip/infa_workflow" => ["run", "get_run_data", "get_run_status", "get_authorized_workflow", "get_param","run_workflow"]}
 
-
+  map.function :approval_manage, {"dip/approval_status" => ["index","get_data"]}
+  map.function :approval_manage, {"dip/approval_node" => ["get_data","approval_agree","approval_reject"]}
 
 end

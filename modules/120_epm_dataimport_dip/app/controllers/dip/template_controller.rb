@@ -66,7 +66,6 @@ class Dip::TemplateController < ApplicationController
     end
     respond_to do |format|
       format.json {
-        p result
         render :json => result
       }
     end
@@ -563,6 +562,68 @@ class Dip::TemplateController < ApplicationController
     end
   end
 
+  def submit_data
+    result={:flag => true}
+    template_id=params[:templateId]
+    valueIds=params[:valueIds]
+    template=Dip::Template.where(:id=>template_id).first
+    combination=Dip::Combination.where(:id=>template[:combination_id]).first
+    if combination
+      #With Combination
+      sql="select * from \"#{combination[:code].to_s.upcase}\" where 1=1"
+      Dip::HeaderValue.find_by_sql("select t1.*,UPPER(t2.CODE) from DIP_HEADER_VALUE t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.\"ID\" in (#{valueIds.collect { |x| "'#{x}'" }.join(",")})").each do|h|
+        sql << " and \"#{h[:code]}\"='#{h[:id]}'"
+      end
+      combination_record=Dip::CommonModel.find_by_sql(sql).first
+      if template_submitted?(template_id,combination_record[:combination_record])
+        result[:flag]=false
+        result[:msg]=[t(:label_combination_submitted)]
+      else
+        apporvalStatus=Dip::ApprovalStatus.where({:template_id=>template_id,:combination_record=>combination_record[:combination_record]}).first
+        if apporvalStatus
+          apporvalStatus.update_attributes({:approval_status=>"PROCESSING"})
+        else
+          Dip::ApprovalStatus.new({:combination_record=>combination_record[:combination_record],
+                                   :template_id=>template_id,
+                                   :approval_status=>"PROCESSING"}).save
+        end
+        plsql.hdm_common_approval.generate_node(:personid=>Irm::Person.current.id,
+                                                :templateid=>template_id,
+                                                :combinationrecord=>combination_record[:combination_record],
+                                                :icommiter=>Irm::Person.current.id,
+                                                :cur_node_id=>nil)
+        result[:msg]=[t(:submit_successful)]
+      end
+    else
+      #No Combination
+      if template_submitted?(template_id,nil)
+        result[:flag]=false
+        result[:msg]=[t(:label_combination_submitted)]
+      else
+        apporvalStatus=Dip::ApprovalStatus.where({:template_id=>template_id,:combination_record=>nil}).first
+        if apporvalStatus
+          apporvalStatus.update_attributes({:approval_status=>"PROCESSING"})
+        else
+          Dip::ApprovalStatus.new({:combination_record=>nil,
+                                   :template_id=>template_id,
+                                   :approval_status=>"PROCESSING"}).save
+        end
+        plsql.hdm_common_approval.generate_node(:personid=>Irm::Person.current.id,
+                                                :templateid=>template_id,
+                                                :combinationrecord=>nil,
+                                                :icommiter=>Irm::Person.current.id,
+                                                :cur_node_id=>nil)
+        result[:msg]=[t(:submit_successful)]
+      end
+    end
+    respond_to do |format|
+      format.json {
+        render :json => result.to_json
+      }
+    end
+
+  end
+
   private
   def get_queried_data(order, template, start, limit, filter, valueIds)
     sql=get_query_sql(nil, template, valueIds)
@@ -681,4 +742,12 @@ class Dip::TemplateController < ApplicationController
     end
   end
 
+  def template_submitted?(template_id,combination_id)
+    apporvalStatus=Dip::ApprovalStatus.where({:template_id=>template_id,:combination_record=>combination_id}).first
+      if apporvalStatus&&apporvalStatus[:approval_status]!='REJECT'
+        return true
+      else
+        return false
+      end
+  end
 end

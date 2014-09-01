@@ -1,0 +1,12 @@
+<%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:name, {:title => t(:label_template_name)}) %>
+    <% builder.column(:id, {:title => t(:label_combination)}) do |data| %>
+        <%= get_combination(data[:template_id],data[:combination_record])%>
+    <% end%>
+    <% builder.column(:approval_status, {:title => t(:label_approval_status)}) do |data|%>
+        <%=t("label_approval_#{data[:approval_status].to_s.downcase}")%>
+        <%if data[:approval_status]=="COMPLETE"%>
+        <a style="color: red" href="javascript:void(0)" onclick="approval_reset(event,'<%= data[:id]%>')"><%= t(:label_approval_reset) %></a>
+        <%end%>
+    <%end%>
+<% end %>

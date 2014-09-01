@@ -23,6 +23,7 @@ Ironmine::Application.routes.draw do
     match '/template/get_ahead_data(.:format)' => "template#get_ahead_data", :via => :get
     match '/template/save_data(.:format)' => "template#save_data", :via => :post
     match '/template/can_create_data(.:format)' => "template#can_create_data", :via => :post
+    match '/template/submit_data(.:format)' => "template#submit_data", :via => :post
 
     match '/template_column/get_data(.:format)' => "template_column#get_data", :via => :get
     match '/template_column/new(.:format)' => "template_column#new", :via => :get
@@ -193,6 +194,14 @@ Ironmine::Application.routes.draw do
     match '/odi_interface/get_data(.:format)' => "odi_interface#get_data", :via => :get
     match '/odi_interface/get_parameter_set(.:format)' => "odi_interface#get_parameter_set", :via => :get
     match '/odi_interface/bind_parameter_set(.:format)' => "odi_interface#bind_parameter_set", :via => :post
+
+    match '/approval_status(/index)(.:format)' => "approval_status#index", :via => :get
+    match '/approval_status/get_data(.:format)' => "approval_status#get_data", :via => :get
+
+    match '/approval_node/get_data(.:format)' => "approval_node#get_data", :via => :get
+    match '/approval_node/approval_agree(.:format)' => "approval_node#approval_agree", :via => :post
+    match '/approval_node/approval_reject(.:format)' => "approval_node#approval_reject", :via => :post
+    match '/approval_node/approval_reset(.:format)' => "approval_node#approval_reset", :via => :post
   end
 
 end

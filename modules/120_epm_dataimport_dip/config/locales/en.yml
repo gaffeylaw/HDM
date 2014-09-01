@@ -408,5 +408,18 @@ en:
    label_in_process: In process
    label_new: New
    end_program_error: End_program Failed
-
+   label_combination_submitted: Already Submitted
+   submit_successful: Successfully Submitted
+   label_name: Name
+   label_combination: Combination
+   label_approval_status: Status
+   label_approval_processing: Processing
+   label_approval_reject: Rejected
+   label_approval_complete: Complete
+   label_approval_jobs: Approval Jobs
+   label_approval_status: Approval Status
+   label_approval_action: Approval
+   label_approval_agree: Agree
+   label_approval_rejected: Reject
+   label_approval_reset: Reset
 

@@ -1,0 +1,2 @@
+module Dip::ApprovalNodeHelper
+end

@@ -408,5 +408,19 @@ zh:
    label_in_process: 处理中
    label_new: 新建
    end_program_error: 善后程序执行失败
+   label_combination_submitted: 已提交
+   submit_successful: 提交成功
+   label_name: 名称
+   label_combination: 组合
+   label_approval_status: 状态
+   label_approval_processing: 审批中
+   label_approval_reject: 已拒绝
+   label_approval_complete: 已审批
+   label_approval_jobs: 待审批任务
+   label_approval_status: 审批状态
+   label_approval_action: 审批
+   label_approval_agree: 同意
+   label_approval_rejected: 拒绝
+   label_approval_reset: 重置
 
 
