@@ -1515,8 +1515,71 @@ end HDM_COMMON_DATA_IMPORT;
       end log;
       end HDM_COMMON_LOG;
     }
+
+    execute %{
+      CREATE OR REPLACE
+PACKAGE HDM_COMMON_APPROVAL IS
+  PROCEDURE generate_node(personId          IN VARCHAR2,
+                          templateId        IN VARCHAR2,
+                          combinationRecord IN VARCHAR2,
+                          icommiter         IN VARCHAR2,
+                          cur_node_id       IN VARCHAR2);
+END;
+
+            }
+    execute %{
+CREATE OR REPLACE
+PACKAGE BODY HDM_COMMON_APPROVAL IS
+  PROCEDURE generate_node(personId          IN VARCHAR2,
+                          templateId        IN VARCHAR2,
+                          combinationRecord IN VARCHAR2,
+                          icommiter         IN VARCHAR2,
+                          cur_node_id       IN VARCHAR2) IS
+    l_nod_id   VARCHAR2(32);
+    l_approver varchar2(22);
+  BEGIN
+    SELECT RAWTOHEX(SYS_GUID()) INTO l_nod_id FROM dual;
+
+    --获取审批人ID存入l_approver
+    IF l_approver IS NOT NULL THEN
+      INSERT INTO DIP_APPROVAL_NODES
+        (ID,
+         TEMPLATE_ID,
+         COMBINATION_RECORD,
+         parent_node,
+         APPROVER,
+         COMMITTER,
+         CREATED_BY,
+         UPDATED_BY,
+         CREATED_AT,
+         UPDATED_AT)
+      VALUES
+        (l_nod_id,
+         templateId,
+         combinationRecord,
+         cur_node_id,
+         l_approver,
+         icommiter,
+         personId,
+         personId,
+         SYSDATE,
+         SYSDATE);
+      commit;
+    ELSE
+      update dip_approval_statuses t
+         set t.approval_status = 'COMPLETE',
+             t.updated_by      = personId,
+             t.updated_at      = sysdate
+       where t.combination_record = combinationRecord
+         and t.template_id = templateId;
+    END IF;
+  END generate_node;
+END HDM_COMMON_APPROVAL;
+
+            }
   end
 
   def down
+
   end
 end
