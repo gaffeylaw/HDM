@@ -418,6 +418,27 @@ Fwk::MenuAndFunctionManager.map do |map|
   }
 #=================================END:Approval=================================
 
+#=================================START:Approval_reset=================================
+  map.function_group :approval_reset, {
+      :en => {:name => "Approval Reset", :description => "Approval Reset"},
+      :zh => {:name => "审批控制", :description => "审批控制"}, }
+  map.function_group :approval_reset, {
+      :zone_code => "DIP_MANAGEMENT",
+      :controller => "dip/approval_status",
+      :action => "manage"}
+  map.function_group :approval_reset, {
+      :children => {
+          :approval_reset => {
+              :en => {:name => "Approval Reset", :description => "Approval Reset"},
+              :zh => {:name => "审批控制", :description => "审批控制"},
+              :default_flag => "N",
+              :login_flag => "N",
+              :public_flag => "N",
+          },
+      }
+  }
+#=================================END:Approval_reset=================================
+
   map.function :combination_manage, {"dip/combination" => ["index", "getHeaderList", "rename", "delete", "get_data", "create", "destroy", "enable", "in_process", "close"]}
 
   map.function :value_set_manage, {"dip/header_value" => ["index", "get_data", "create", "destroy", "update", "enable", "disable"]}
@@ -473,5 +494,6 @@ Fwk::MenuAndFunctionManager.map do |map|
 
   map.function :approval_manage, {"dip/approval_status" => ["index","get_data"]}
   map.function :approval_manage, {"dip/approval_node" => ["get_data","approval_agree","approval_reject"]}
-
+  map.function :approval_reset,{"dip/approval_status"=>["get_manage_data","manage"]}
+  map.function :approval_reset,{"dip/approval_node" => ["approval_reset"]}
 end

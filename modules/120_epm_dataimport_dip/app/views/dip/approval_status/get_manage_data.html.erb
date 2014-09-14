@@ -5,5 +5,6 @@
     <% end%>
     <% builder.column(:approval_status, {:title => t(:label_approval_status)}) do |data|%>
         <%=t("label_approval_#{data[:approval_status].to_s.downcase}")%>
+        <a style="color: red" href="javascript:void(0)" onclick="approval_reset(event,'<%= data[:id]%>')"><%= t(:label_approval_reset) %></a>
     <%end%>
 <% end %>

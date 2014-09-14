@@ -48,7 +48,12 @@ class Dip::ApprovalNodeController < ApplicationController
 
   def approval_reset
     statusId=params[:statusId]
-    Dip::ApprovalStatus.where({:id=>statusId}).first.destroy
+    approvalStatus=Dip::ApprovalStatus.where({:id=>statusId}).first
+    approvalStatus.destroy
+    Dip::ApprovalNode.where({:combination_record=>approvalStatus[:combination_record],
+                             :template_id=>approvalStatus[:template_id]}).each do|d|
+      d.destroy
+    end
     respond_to do |format|
       format.json {
         render :json => ""

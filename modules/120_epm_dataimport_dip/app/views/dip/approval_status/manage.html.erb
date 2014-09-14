@@ -1,0 +1,31 @@
+<%= common_title %>
+<div class="page-block">
+
+  <div class="page-block-body">
+    <div class="sub-page-block">
+      <div class="sub-page-block-body">
+        <div id="approval_jobs"></div>
+        <%= datatable("data_area", {:action => "get_manage_data"},
+                      [],
+                      {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+      </div>
+    </div>
+  </div>
+  <table class="page-block-footer">
+    <tr>
+      <td class="page-block-title">
+      </td>
+    </tr>
+  </table>
+</div>
+<script>
+    function approval_reset(event,statusId){
+        $.post("<%= url_for({:action => :approval_reset,:controller => "dip/approval_node",:format=>:json})%>", {statusId:statusId}, function (result) {
+            var params = {};
+            var current_target= $("#data_area").data("datatable").target;
+            current_target.data.options.defaultOptions = params;
+            current_target.data.options.searchOptions = {};
+            current_target.loadPage(1);
+        }, "json");
+    }
+</script>

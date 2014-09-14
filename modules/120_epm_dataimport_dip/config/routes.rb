@@ -197,6 +197,8 @@ Ironmine::Application.routes.draw do
 
     match '/approval_status(/index)(.:format)' => "approval_status#index", :via => :get
     match '/approval_status/get_data(.:format)' => "approval_status#get_data", :via => :get
+    match '/approval_status/manage(.:format)' => "approval_status#manage", :via => :get
+    match '/approval_status/get_manage_data(.:format)' => "approval_status#get_manage_data", :via => :get
 
     match '/approval_node/get_data(.:format)' => "approval_node#get_data", :via => :get
     match '/approval_node/approval_agree(.:format)' => "approval_node#approval_agree", :via => :post

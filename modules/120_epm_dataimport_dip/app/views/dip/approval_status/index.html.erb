@@ -53,18 +53,4 @@
             current_target.loadPage(1);
         }, "json");
     }
-    function approval_reset(event,statusId){
-        $.post("<%= url_for({:action => :approval_reset,:controller => "dip/approval_node",:format=>:json})%>", {statusId:statusId}, function (result) {
-            var params = {};
-            var current_target = $("#approval_jobs").data("datatable").target;
-            current_target.data.options.defaultOptions = params;
-            current_target.data.options.searchOptions = {};
-            current_target.loadPage(1);
-
-            current_target = $("#data_area").data("datatable").target;
-            current_target.data.options.defaultOptions = params;
-            current_target.data.options.searchOptions = {};
-            current_target.loadPage(1);
-        }, "json");
-    }
 </script>
