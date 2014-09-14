@@ -7,7 +7,6 @@
         <tr>
           <td>
             <b><%= t :cur_label %>：</b><%= Dip::Template.find(params[:id]).name %>
-            <b> Batch_id: </b> <%= params[:batch_id] %>
           </td>
           <td>
             <%= link_to(t(:back), {:controller => "dip/import_management", :action => "index"}, :class => "btn btn-primary") %>

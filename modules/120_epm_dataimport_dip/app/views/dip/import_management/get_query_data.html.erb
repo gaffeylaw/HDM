@@ -14,7 +14,7 @@
         <% end %>
     <% end %>
     <% @headers.each do |h| %>
-        <% builder.column("dip"+h.header_id.to_s.downcase, {:title => Dip::Header.find(h.header_id).name, :width => "130px"}) %>
+    <% builder.column("#{h[:code].to_s.downcase}_v", {:title => Dip::Header.find(h.header_id).name, :width => "180px"}) %>
     <% end %>
 <% end %>
 

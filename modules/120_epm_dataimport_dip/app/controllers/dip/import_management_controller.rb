@@ -95,8 +95,8 @@ class Dip::ImportManagementController < ApplicationController
         @count=count
         @template=template
         @template_column=Dip::TemplateColumn.where(:template_id => @template.id).order(:index_id)
-        @headers=Dip::CombinationHeader.where(:combination_id => template.combination_id)
-      }
+	@headers=Dip::CombinationHeader.find_by_sql("select t2.CODE,t1.HEADER_ID from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2  where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{template[:combination_id]}'")      
+	}
     end
   end
 
@@ -205,44 +205,33 @@ class Dip::ImportManagementController < ApplicationController
 
   def get_query_sql(order, template, values,batch_id)
     if template.combination_id
+      combination=Dip::Combination.where(:id => template[:combination_id]).first
       sql_select= "select v.*"
-      from_sql=" from #{template.query_view} v, DIP#{template.combination_id.to_s.upcase}_VIEW c "
+      from_sql=" from #{template.query_view} v, \"#{combination[:code]}\" c "
       where_sql=" where v.COMBINATION_RECORD = c.COMBINATION_RECORD and v.batch_id = '#{batch_id}'"
-      valueIds={}
       if values
-        values.each do |v|
-          headerValue=Dip::HeaderValue.find(v)
-          valueIds["#{headerValue.header_id}"]=v
+        Dip::CommonModel.find_by_sql("select t1.CODE,t2.HEADER_ID,t2.\"ID\" from"+
+                                         " DIP_HEADER t1,DIP_HEADER_VALUE t2  where t1.\"ID\"=t2.HEADER_ID and t2.\"ID\" in(#{values.collect { |x| "'#{x}'" }.join(",")})").each do |h|
+          where_sql << " and c.\"#{h[:code].to_s.upcase}\"='#{h[:id]}'"
         end
       end
-      headers=Dip::CombinationHeader.where(:combination_id => template.combination_id)
-      n=1
-      headers.each do |h|
-        sql_select << ",v#{n}.value \"DIP#{h.header_id.to_s.upcase}\""
-        from_sql << ",dip_header_value v#{n}"
-        where_sql << " and c.DIP#{h.header_id.to_s.upcase}=v#{n}.id"
-        if valueIds["#{h.header_id}"]
-          where_sql << " and c.DIP#{h.header_id.to_s.upcase}='#{valueIds[h.header_id]}'"
-        else
-          authorized=Dip::DipAuthority.get_all_authorized_value_data(Irm::Person.current.id, Dip::DipConstant::AUTHORITY_PERSON, Dip::DipConstant::AUTHORITY_VALUE, h.header_id).collect { |v| "'"+v.function+"'" }.join(",")
-          if authorized.size < 1
-            authorized='-1'
-          end
-          where_sql << " and c.DIP#{h.header_id.to_s.upcase} in (#{authorized})"
-        end
-        n+=1
+      Dip::CombinationHeader.find_by_sql("select t1.HEADER_ID,t2.CODE from DIP_COMBINATION_HEADERS t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.COMBINATION_ID='#{template[:combination_id]}'").each_with_index do |h, i|
+        sql_select << ",c.\"#{h[:code].to_s.upcase}\""
+        sql_select << ",c.\"#{h[:code].to_s.upcase}_V\""
+        from_sql << ",DIP_AUTHORITYXES auth#{i}"
+        where_sql << " and auth#{i}.function=c.\"#{h[:code].to_s.upcase}\" and auth#{i}.function_type='VALUE'"
       end
       sql = sql_select
       sql << from_sql
       sql << where_sql
     else
-      sql="select v.* from #{template.query_view} v where v.batch_id = '#{batch_id}'"
+      sql="select v.* from #{template.query_view} v where 1=1 "
     end
     if order
       sql << " order by #{order.upcase}"
     end
     return sql
-  end
+  end  
 
   def create_folder
     model_folder= File.expand_path("../../../../../../public/upload", __FILE__)

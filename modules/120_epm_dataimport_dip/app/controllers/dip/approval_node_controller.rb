@@ -3,7 +3,7 @@ class Dip::ApprovalNodeController < ApplicationController
   def get_data
     start=params[:start].to_i
     limit=params[:limit].to_i
-    sql="select t1.*,t2.\"NAME\" from DIP_APPROVAL_NODES t1,DIP_TEMPLATE t2 where t1.APPROVER='#{Irm::Person.current.id}' and t1.APPROVE_STATUS is null"
+    sql="select t1.*,t2.\"NAME\" from DIP_APPROVAL_NODES t1,DIP_TEMPLATE t2 where t1.template_id=t2.id and t1.APPROVER='#{Irm::Person.current.id}' and t1.APPROVE_STATUS is null"
     data=Dip::ApprovalNode.find_by_sql(Dip::Utils.paginate(sql,start,limit))
     count=Dip::Utils.get_count(sql)
     respond_to do |format|
