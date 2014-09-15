@@ -14,6 +14,7 @@ class CreateDipTemplate < ActiveRecord::Migration
       t.string :end_program, :limit => 255
       t.string :created_by, :limit => 22, :collate => "utf8_bin"
       t.string :updated_by, :limit => 22, :collate => "utf8_bin"
+      t.string :file_name,:limit=>100
       t.timestamps
     end
     add_index :dip_template, :template_category_id, :name => :template_category_id_n1

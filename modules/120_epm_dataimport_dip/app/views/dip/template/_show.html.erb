@@ -11,6 +11,8 @@
           <tr>
             <td class="label-col"><label><%= t(:descs) %></label></td>
             <td class="data-col"><%= f.text_area :descs, :rows => 1, :cols => 100, :id => "descs" ,:style=>"width:300px"%></td>
+            <td class="label-col"><label><%= t(:label_file_name) %></label></td>
+            <td class="data-col"><%= f.text_field :file_name, :required => false, :id => "file_name" ,:style=>"width:300px"%></td>
           </tr>
           <tr>
             <td class="label-col"><label><%= t(:label_dip_actual_table) %></label></td>

@@ -161,7 +161,11 @@ class Dip::TemplateController < ApplicationController
     if params[:id].present?
       if !params[:id].nil?
         template=Dip::Template.where(:id => params[:id]).first
-        xls_path=template.export_template(params[:id], params[:type])
+        if template[:file_name]
+          xls_path=template[:file_name]+"."+params[:type]
+        else
+          xls_path=template.export_template(params[:id], params[:type])
+        end
       end
     end
     respond_to do |format|
