@@ -8,12 +8,12 @@
         <div id="approval_jobs"></div>
         <%= datatable("approval_jobs", {:controller=>"dip/approval_node",:action => "get_data"},
                       [],
-                      {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy"}}) %>
+                      {:search_box => "searchBox", :paginator_box => "paginator", :scroll => {:mode => "xy",:height=>"200px"}}) %>
         <div style="width: 100%;background-color: lightcyan;color: red"><%=t(:label_approval_status)%></div>
         <div id="data_area"></div>
         <%= datatable("data_area", {:action => "get_data"},
                       [],
-                      {:search_box => "searchBox1", :paginator_box => "paginator1", :scroll => {:mode => "xy"}}) %>
+                      {:search_box => "searchBox1", :paginator_box => "paginator1", :scroll => {:mode => "xy",:height=>"200px"}}) %>
       </div>
     </div>
   </div>
@@ -25,6 +25,12 @@
   </table>
 </div>
 <script>
+    $(document).ready(function(){
+        var bodys=$(".table-body").toArray();
+        for(var i in bodys){
+            bodys[i].style["height"]="250px";
+        }
+    });
     function approval_agree(event,nodeId){
         $.post("<%= url_for({:action => :approval_agree,:controller => "dip/approval_node",:format=>:json})%>", {nodeId:nodeId}, function (result) {
             var params = {};
