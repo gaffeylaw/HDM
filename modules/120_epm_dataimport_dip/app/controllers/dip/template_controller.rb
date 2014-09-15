@@ -659,7 +659,7 @@ class Dip::TemplateController < ApplicationController
         sql_select << ",c.\"#{h[:code].to_s.upcase}\""
         sql_select << ",c.\"#{h[:code].to_s.upcase}_V\""
         from_sql << ",DIP_AUTHORITYXES auth#{i}"
-        where_sql << " and auth#{i}.function=c.\"#{h[:code].to_s.upcase}\" and auth#{i}.function_type='VALUE'"
+        where_sql << " and auth#{i}.function=c.\"#{h[:code].to_s.upcase}\" and auth#{i}.function_type='VALUE'  and auth#{i}.person_id='#{Irm::Person.current.id}'"
       end
       sql = sql_select
       sql << from_sql
