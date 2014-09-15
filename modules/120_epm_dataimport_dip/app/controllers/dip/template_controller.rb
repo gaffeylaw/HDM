@@ -305,11 +305,12 @@ class Dip::TemplateController < ApplicationController
     begin
       order_name=params[:order_name]
       order_value=params[:order_value]
+      template=Dip::Template.find(params[:id])
       order= "v.combination_record"
+      order << (Dip::Template.has_idx?(template[:query_view]) ? ",v.idx":"")
       if (order_name)
         order="v."+order_name +" "+order_value
       end
-      template=Dip::Template.find(params[:id])
       start=params[:start].to_i
       limit=params[:limit].to_i
       filter=[]
@@ -348,7 +349,7 @@ class Dip::TemplateController < ApplicationController
       end
     end
     file_name << "_#{Irm::Person.current.login_name}"
-    order= "v.combination_record,v.row_id"
+    order= "v.combination_record,#{Dip::Template.has_idx?(template[:query_view]) ? "v.idx,":""}v.row_id"
     sql=get_query_sql(order, template, params[:valueIds])
     count=Dip::Utils.get_count(sql)
     page=(count+batch_count-1)/batch_count

@@ -69,11 +69,12 @@ class Dip::ImportManagementController < ApplicationController
     begin
       order_name=params[:order_name]
       order_value=params[:order_value]
+      template=Dip::Template.find(params[:id])
       order= "v.combination_record"
+      order << (Dip::Template.has_idx?(template[:query_view]) ? ",v.idx":"")
       if (order_name)
         order="v."+order_name +" "+order_value
       end
-      template=Dip::Template.find(params[:id])
       start=params[:start].to_i
       limit=params[:limit].to_i
       batch_id=params[:batch_id]

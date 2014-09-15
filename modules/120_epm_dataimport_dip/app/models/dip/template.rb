@@ -64,4 +64,9 @@ class Dip::Template < ActiveRecord::Base
                                             :description => 'Template Data'})
     return out_file.data.path
   end
+
+  def self.has_idx?(table_name)
+    col=Dip::CommonModel.find_by_sql("select t.column_name from user_tab_columns t where t.table_name ='#{table_name.to_s.upcase}' and t.column_name='IDX'")
+    col.empty? ? false:true
+  end
 end
