@@ -280,10 +280,10 @@ class Dip::TemplateController < ApplicationController
       i=i+1
     end
     sql<< " order by t1.\"#{headers[valueIds.length][:code].to_s.upcase}\" "
-    values=ActiveRecord::Base.connection().execute(sql)
+    values=Dip::CommonModel.find_by_sql(sql)
     returnValue=[["", ""]]
-    while (row=values.fetch)
-      returnValue<<row
+    values.each do |v|
+      returnValue << [v[:value],v[:id]]
     end
     respond_to do |format|
       format.html {
