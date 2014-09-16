@@ -576,8 +576,6 @@ class Dip::TemplateController < ApplicationController
     result={:flag => true}
     template_id=params[:templateId]
     valueIds=params[:valueIds]
-    p '--------------------------------------------'
-    p "select t1.*,UPPER(t2.CODE) from DIP_HEADER_VALUE t1,DIP_HEADER t2 where t1.HEADER_ID=t2.\"ID\" and t1.\"ID\" in (#{valueIds.collect { |x| "'#{x[1]}'" }.join(",")})"
     template=Dip::Template.where(:id => template_id).first
     combination=Dip::Combination.where(:id => template[:combination_id]).first
     if combination
@@ -756,7 +754,6 @@ class Dip::TemplateController < ApplicationController
 
   def template_submitted?(template_id, combination_id)
     apporvalStatus=Dip::ApprovalStatus.where({:template_id => template_id, :combination_record => combination_id}).first
-    p apporvalStatus.to_json
     if apporvalStatus&&apporvalStatus[:approval_status]!='REJECT'
       return true
     else

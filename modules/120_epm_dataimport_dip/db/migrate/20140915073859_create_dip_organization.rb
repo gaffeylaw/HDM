@@ -11,8 +11,8 @@ class CreateDipOrganization < ActiveRecord::Migration
       t.integer :idx
       t.timestamps
     end
-    execute %{create or replace view dip_organization_v as select t.rowid row_id,t.* from dip_organization t }
     change_column :dip_organization, "id", :string, :limit => 22
+    execute %{create or replace view dip_organization_v as select t.rowid row_id,t.* from dip_organization t }
     add_index(:dip_organization,:p_org_id,:name=>:dip_organization_i01)
   end
 
