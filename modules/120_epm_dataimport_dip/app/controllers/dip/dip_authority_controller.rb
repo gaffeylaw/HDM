@@ -3,10 +3,11 @@ class Dip::DipAuthorityController < ApplicationController
 
   def get_tree_data
     tree_nodes = []
-    root_organization = Irm::Organization.multilingual.where({:parent_org_id => nil, :status_code => "ENABLED"}).order("name")
-    root_organization.each do |org|
-      tree_node=get_child_notes(org)
-      tree_nodes << tree_node
+    root=params[:root]
+    if root=='source'
+      tree_nodes=get_child_notes(nil)
+    else
+      tree_nodes=get_child_notes(root)
     end
     respond_to do |format|
       format.json { render :json => tree_nodes.to_json }
@@ -408,24 +409,22 @@ class Dip::DipAuthorityController < ApplicationController
   #####
   private
   def get_child_notes(org)
-    children=[]
-    if org.id
-      Irm::Organization.multilingual.where({:parent_org_id => org.id, :status_code => "ENABLED"}).each do |c|
-        children << get_child_notes(c)
-      end
-    end
-    name=org[:name]
-    tree_node={:id => org.id, :name => name, :note_type => Dip::DipConstant::AUTHORITY_GROUP, :text => name, :children => children, :checked => false, :expanded => false}
-    tree_node[:children]=tree_node[:children] + get_child_for_org(org)
-    tree_node
-  end
+    tree_nodes=[]
+    Irm::Organization.multilingual.where({:parent_org_id => org, :status_code => "ENABLED"}).order("name").each do|g|
+      child_org_count=Irm::Organization.multilingual.where({:parent_org_id => g[:id], :status_code => "ENABLED"}).count
+      child_person_count=Irm::Person.where({:organization_id =>g[:id], :status_code => "ENABLED"}).count
 
-  def get_child_for_org(org)
-    children=[]
-    Irm::Person.where({:organization_id => org.id, :status_code => "ENABLED"}).each do |p|
-      children << {:id => p.id, :name => p.full_name, :note_type => Dip::DipConstant::AUTHORITY_PERSON, :text => p.full_name, :checked => false, :expanded => false}
+      tree_node={:id => g[:id], :name => g[:name], :note_type => Dip::DipConstant::AUTHORITY_GROUP, :text => g[:name],
+                 #:children => children,
+                 :leaf=>false,
+                 :hasChildren=>child_org_count+child_person_count>0 ? true:false,
+                 :children=>[],
+                 :checked => false, :expanded => false}
+      tree_nodes << tree_node
     end
-    children
+    Irm::Person.where({:organization_id => org, :status_code => "ENABLED"}).each do |p|
+      tree_nodes << {:id => p.id, :name => p.full_name,:hasChildren=>false,:note_type => Dip::DipConstant::AUTHORITY_PERSON, :text => p.full_name, :checked => false, :expanded => false}
+    end
+    tree_nodes
   end
-
 end
