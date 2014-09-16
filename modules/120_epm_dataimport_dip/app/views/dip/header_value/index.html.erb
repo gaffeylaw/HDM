@@ -29,9 +29,13 @@
             <% if allow_to?({:controller => "dip/header_value", :action => "create"}) %>
                 <button data-toggle="button" class="btn btn-primary" onclick="show_add_value(event)"><%= t(:add_value) %></button>
             <% end %>
+            <% if allow_to?({:controller => "dip/header_value", :action => "sync_value"}) %>
+                <button data-toggle="button" class="btn btn-primary" onclick="sync_value(event)"><%= t(:synchronous) %></button>
+            <% end %>
             <% if allow_to?({:controller => "dip/header_value", :action => "enable"}) %>
                 <button data-toggle="button" class="btn btn-primary" onclick="enable_value(event)"><%= t(:label_dip_enable) %></button>
             <% end %>
+
             <% if allow_to?({:controller => "dip/header_value", :action => "disable"}) %>
                 <button data-toggle="button" class="btn btn-primary" onclick="disable_value(event)"><%= t(:label_dip_disable) %></button>
             <% end %>
@@ -227,6 +231,13 @@
             showFadeBackMessage("header_value_index_msg", result.msg);
             $("#create_value_modal").modal("hide");
             reloadTable();
+        }, "json");
+    }
+    function sync_value(event){
+        $.post("<%= url_for({:action => :sync_value,:controller => "dip/header_value",:format=>:json})%>", {}, function (result) {
+            alert(result);
+            var current_target = $("#data_area").data("datatable").target;
+            current_target.loadPage(1);
         }, "json");
     }
 </script>

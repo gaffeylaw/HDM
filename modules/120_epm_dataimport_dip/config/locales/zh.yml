@@ -423,5 +423,7 @@ zh:
    label_approval_rejected: 拒绝
    label_approval_reset: 重置
    label_file_name: 文件名称
+   label_sync_org_success: 同步成功
+   label_sync_org_with_error: 同步完成，但有错误，请查看日志
 
 

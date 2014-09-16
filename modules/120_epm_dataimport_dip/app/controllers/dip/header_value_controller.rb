@@ -182,4 +182,28 @@ class Dip::HeaderValueController < ApplicationController
       end
     end
   end
+  def sync_value
+    error_flag=false
+    Dip::Header.where("1=1").each do |h|
+      Dip::CommonModel.find_by_sql("select * from dip_values t where t.value_set_code='#{h[:code]}'").each do |v|
+       value= Dip::HeaderValue.where({:header_id=>h[:id],:code=>v[:value_code]}).first
+        unless value
+          begin
+          Dip::HeaderValue.new({:header_id=>h[:id],
+                                :code=>v[:value_code],
+                                :value=>v[:value],
+                                :enabled=>0}).save
+          rescue =>ex
+            error_flag=true
+            logger.error(ex)
+          end
+        end
+      end
+    end
+    respond_to do |format|
+      format.json {
+        render :json => error_flag ? (t(:label_sync_org_with_error).to_json):(t(:label_sync_org_success).to_json)
+      }
+    end
+  end
 end

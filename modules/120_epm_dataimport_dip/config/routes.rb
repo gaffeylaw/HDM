@@ -77,6 +77,7 @@ Ironmine::Application.routes.draw do
     match '/header_value/destroy(.:format)' => "header_value#destroy", :via => :post
     match '/header_value/enable(.:format)' => "header_value#enable", :via => :post
     match '/header_value/disable(.:format)' => "header_value#disable", :via => :post
+    match '/header_value/sync_value(.:format)' => "header_value#sync_value", :via => :post
 
     match '/header/create(.:format)' => "header#create", :via => :post
     match '/header/update(.:format)' => "header#update", :via => :post

@@ -1043,7 +1043,7 @@ Fwk::MenuAndFunctionManager.map do |map|
               :default_flag => "N",
               :login_flag => "N",
               :public_flag => "N",
-              "irm/people" => ["index", "show","get_data", "get_choose_people","get_support_group", "get_owned_roles","multilingual_edit", "multilingual_update", "add_roles", "remove_role", "select_roles", "get_available_roles"]
+              "irm/people" => ["index", "sync_user","show","get_data", "get_choose_people","get_support_group", "get_owned_roles","multilingual_edit", "multilingual_update", "add_roles", "remove_role", "select_roles", "get_available_roles"]
           },
           :edit_person_basic_info => {
               :en => {:name => "Edit Basic Info", :description => "Edit Basic Info"},
@@ -1226,7 +1226,7 @@ Fwk::MenuAndFunctionManager.map do |map|
               :default_flag => "N",
               :login_flag => "N",
               :public_flag => "N",
-              "irm/organizations" => ["belongs_to", "create", "edit", "get_by_company", "get_data", "index", "multilingual_edit", "multilingual_update", "new", "show", "update"],
+              "irm/organizations" => ["belongs_to","sync_org", "create", "edit", "get_by_company", "get_data", "index", "multilingual_edit", "multilingual_update", "new", "show", "update"],
           },
       }
   }

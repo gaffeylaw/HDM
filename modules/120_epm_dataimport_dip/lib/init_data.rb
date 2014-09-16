@@ -441,7 +441,7 @@ Fwk::MenuAndFunctionManager.map do |map|
 
   map.function :combination_manage, {"dip/combination" => ["index", "getHeaderList", "rename", "delete", "get_data", "create", "destroy", "enable", "in_process", "close"]}
 
-  map.function :value_set_manage, {"dip/header_value" => ["index", "get_data", "create", "destroy", "update", "enable", "disable"]}
+  map.function :value_set_manage, {"dip/header_value" => ["index","sync_value", "get_data", "create", "destroy", "update", "enable", "disable"]}
 
   map.function :value_set_category_manage, {"dip/header" => ["get_data", "create", "update", "destroy", "get_header"]}
 

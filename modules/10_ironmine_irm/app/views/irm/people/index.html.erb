@@ -8,6 +8,7 @@
     </td>
     <td class="page-block-button">
       <%= link_to t(:new), {:action => "new"},:class=>"btn"%>
+      <button onclick="sync_user(event)" class="btn btn-primary"><%= t(:synchronous) %></button>
     </td>
     <td class="page-block-help">
       <div id="searchBox"></div>
@@ -19,3 +20,12 @@
     <div id="paginatorBox"></div>
   </div>
 </div>
+<script type="text/javascript">
+    function sync_user(event){
+        $.post("<%= url_for({:action => :sync_user,:controller => "irm/people",:format=>:json})%>", {}, function (result) {
+            alert(result);
+            var current_target = $("#person").data("datatable").target;
+            current_target.loadPage(1);
+        }, "json");
+    }
+</script>

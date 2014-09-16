@@ -276,6 +276,7 @@ Rails.application.routes.draw do
     match '/organizations/:id/multilingual_update(.:format)' => "organizations#multilingual_update", :via => :put
     match '/organizations/belongs_to(.:format)' => "organizations#belongs_to"
     match '/organizations/get_by_company(.:format)' => "organizations#get_by_company", :via => :get
+    match '/organizations/sync_org(.:format)' => "organizations#sync_org", :via => :post
 
     #organization_infos
     match '/organization_infos/get_data(.:format)' => "organization_infos#get_data"
@@ -393,6 +394,7 @@ Rails.application.routes.draw do
     match '/people/:person_id/get_owned_roles(.:format)' => "people#get_owned_roles", :via => :get
     match '/people/:person_id/get_owned_external_systems(.:format)' => "people#get_owned_external_systems", :via => :get
     match '/people/:id/info_card(.:format)' => "people#info_card", :via => :get
+    match '/people/sync_user(.:format)' => "people#sync_user", :via => :post
     #id_flexes
     match '/id_flexes(/index)(.:format)' => "id_flexes#index", :via => :get
     match '/id_flexes/:id/edit(.:format)' => "id_flexes#edit", :via => :get

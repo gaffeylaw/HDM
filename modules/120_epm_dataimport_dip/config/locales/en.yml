@@ -423,4 +423,6 @@ en:
    label_approval_rejected: Reject
    label_approval_reset: Reset
    label_file_name: File Name
+   label_sync_org_success: Synchronize Sunccess
+   label_sync_org_with_error: Synchronize complete with errors,please check the log.
 

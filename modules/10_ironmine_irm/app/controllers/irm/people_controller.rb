@@ -224,4 +224,32 @@ class Irm::PeopleController < ApplicationController
     @person = Irm::Person.list_all.find(params[:id])
     render :layout => "common_all"
   end
+
+  def sync_user
+    error_flag=false
+    Dip::CommonModel.find_by_sql("select * from dip_user").each do |usr|
+      cur_user=Irm::Person.where({:login_name=>usr[:user_acc]}).first
+      unless cur_user
+        profile=Dip::CommonModel.find_by_sql("select * from irm_profiles t where t.code='#{usr[:profile]}' ").first
+        if profile
+          begin
+            Irm::Person.new({:login_name=>usr[:user_acc],:email_address=>usr[:mail_addr],
+                         :profile_id=>profile[:id],:first_name=>usr[:name],
+                         :bussiness_phone=>usr[:phone],
+                         :language_code=>'zh',:organization_id=>usr[:org_id],
+                         :password=>usr[:default_pwd]}).save
+          rescue => ex
+            error_flag=true
+            logger.error(ex)
+          end
+        else
+          error_flag=true
+          logger.error("Profile with code [#{usr[:code]}] can't be found")
+        end
+      end
+    end
+    respond_to do |format|
+      format.json { render :json=>error_flag ? (t(:label_sync_org_with_error).to_json):(t(:label_sync_org_success).to_json) }
+    end
+  end
 end

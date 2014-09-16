@@ -10,11 +10,17 @@
   <table class="page-block-header">
     <tr>
       <% unless params[:mode] == 'list' %>
-          <td class="page-block-title"><h2 class="block-title"><%= t(:label_irm_organization_structure) %></h2></td>
+          <td class="page-block-title"><h2 class="block-title"><%= t(:label_irm_organization_structure) %></h2>
+
+          </td>
+          <td class="page-block-button">
+            <button onclick="sync_org(event)" class="btn btn-primary"><%= t(:synchronous) %></button>
+          </td>
       <% else %>
           <td class="page-block-title"><h2 class="block-title"><%= t(:label_irm_organization_list) %></h2></td>
           <td class="page-block-button">
             <%= link_to t(:new), {:action => "new"}, :class => "btn" %>
+            <button onclick="sync_org(event)" class="btn btn-primary"><%= t(:synchronous) %></button>
           </td>
       <% end %>
       <td class="page-block-help">
@@ -58,6 +64,8 @@
                   unique:false,
                   persist:"cookie"
               });
+
+
           </script>
 
         </ul>
@@ -122,3 +130,13 @@
     <% end %>
   </div>
 </div>
+<script>
+    function sync_org(event){
+        $.post("<%= url_for({:action => :sync_org,:controller => "irm/organizations",:format=>:json})%>",
+                {},
+                function(result) {
+                    alert(result);
+                    location.reload();
+                }, "json");
+    }
+</script>
