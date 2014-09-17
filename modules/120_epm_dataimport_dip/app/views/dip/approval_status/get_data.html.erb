@@ -3,6 +3,9 @@
     <% builder.column(:id, {:title => t(:label_combination)}) do |data| %>
         <%= get_combination(data[:template_id],data[:combination_record])%>
     <% end%>
+    <% builder.column(:path, {:title => t(:label_approval_path)}) do |data| %>
+        <%=get_approve_path(data[:template_id],data[:combination_record])%>
+    <% end%>
     <% builder.column(:approval_status, {:title => t(:label_approval_status)}) do |data|%>
         <%=t("label_approval_#{data[:approval_status].to_s.downcase}")%>
     <%end%>

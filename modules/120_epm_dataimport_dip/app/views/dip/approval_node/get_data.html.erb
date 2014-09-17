@@ -3,6 +3,9 @@
     <% builder.column(:combination_record, {:title => t(:label_combination)}) do |data| %>
         <%= get_combination(data[:template_id],data[:combination_record])%>
     <% end%>
+    <% builder.column(:approve_status, {:title => t(:label_approval_path)}) do |data| %>
+        <%=get_approve_path(data[:template_id],data[:combination_record])%>
+    <% end%>
     <% builder.column(:id, {:title => t(:operation)}) do |data|%>
         <a href="javascript:void(0)" onclick="approval_agree(event,'<%= data[:id]%>')"><%= t(:label_approval_agree) %></a>
         <a href="javascript:void(0)" onclick="approval_reject(event,'<%= data[:id]%>')"><%= t(:label_approval_rejected) %></a>
