@@ -51,22 +51,13 @@ class Dip::CombinationController < ApplicationController
     combination_new=Dip::Combination.new({:name => name, :code => code})
     if (combination_new.save)
       begin
-        list={}
         headerIds.each do |h|
           Dip::CombinationHeader.new({:combination_id => combination_new[:id], :header_id => h}).save
-          headerVals=Dip::HeaderValue.select("id").where(:header_id => h).collect { |c| c.id }
-          list["#{h}"]=headerVals
-        end
-        record_size=1
-        list.values.each do |v|
-          record_size=record_size*v.size
-        end
-        if record_size>0
-          con=Dip::Combination.new
-          con.generate_combination_records(combination_new[:id], headerIds.size, [], list.values, 0, 0)
-          con.saveData
         end
         generateView(combination_new[:id])
+        Dip::HeaderValue.where({:header_id=>headerIds[0],:enabled=>true}).each do |v|
+          Dip::Combination.enable_new_value(v[:id],true)
+        end
         result[:msg]=[t(:label_operation_success)]
       rescue => ex
         logger.error ex

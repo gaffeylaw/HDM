@@ -16,10 +16,10 @@ class Dip::HeaderValueController < ApplicationController
       if (headerValue.save)
         if ("true"==v["enabled"])
           begin
-            id=[Dip::HeaderValue.where(:header_id => v["header_id"], :value => v["value"], :code => v["code"]).first.id]
+            id=Dip::HeaderValue.where(:header_id => v["header_id"], :value => v["value"], :code => v["code"]).first.id
             enable_new_value(id)
             headerValue.errors.add("success_msg_only", t(:label_operation_success));
-          rescue  => ex
+          rescue => ex
             logger.error ex
             headerValue.errors.add("fail_msg_only", t(:label_operation_fail));
           end
@@ -82,60 +82,21 @@ class Dip::HeaderValueController < ApplicationController
     end
   end
 
-  def enable_new_value(valueIds)
-    if (!valueIds.nil?&&valueIds.any?)
-      valueIds.each do |v|
-        headerValue=Dip::HeaderValue.find(v)
-        if (!headerValue.nil?&&headerValue.enabled==false)
-          ActiveRecord::Base.transaction do
-            temp=headerValue.update_attributes({:enabled => true})
-            combinations=Dip::CombinationHeader.where(:header_id => headerValue.header_id)
-            if (combinations.any?)
-              combinations.each do |c|
-                headers=Dip::CombinationHeader.where(:combination_id => c.combination_id)
-                list={}
-                headers.each do |header|
-                  vals=Dip::HeaderValue.select("id").where(:header_id => header.header_id).collect { |v| v.id }
-                  list["#{header.header_id}"]=vals
-                end
-                list["#{headerValue.header_id}"]=["#{headerValue.id}"]
-                record_size=1
-                list.values.each do |v|
-                  record_size=record_size*v.size
-                end
-                if record_size>0
-                  con=  Dip::Combination.new
-                  con.generate_combination_records(c.combination_id, headers.size, [], list.values, 0, 0)
-                  con.saveData
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-
   def enable
     result={:success => true}
     begin
       valueIds=params[:valueIds]
       valueIds.each do |v|
         headerValue=Dip::HeaderValue.find(v)
-        if (!headerValue.nil?&&headerValue.enabled==false)
-          if(Dip::CombinationItem.where(:header_value_id=>v).count>0)
-            ActiveRecord::Base.transaction do
-              headerValue.update_attributes({:enabled => true})
-            end
-          else
-            enable_new_value([v])
-          end
+        ActiveRecord::Base.transaction do
+          Dip::Combination.enable_new_value(v,false)
         end
       end
       result[:msg]=[t(:label_operation_success)]
-    rescue
+    rescue =>ex
       result[:success] = false
       result[:msg]=[t(:label_operation_fail)]
+      logger.error ex
     end
     respond_to do |format|
       format.json {
@@ -150,15 +111,21 @@ class Dip::HeaderValueController < ApplicationController
       valueIds=params[:valueIds]
       headerId=nil
       if (!valueIds.nil?&&valueIds.any?)
-        valueIds.each do |v|
-          ActiveRecord::Base.transaction do
-            headerValue=Dip::HeaderValue.find(v)
-            headerId=headerValue.header_id
-            if (!headerValue.nil?&&headerValue.enabled==true)
-              headerValue.update_attributes({:enabled => false})
-              disable_value_related(headerValue.id)
-            end
-          end
+        value_str=valueIds.collect { |x| "'#{x}'" }.join(",")
+        ActiveRecord::Base.transaction do
+          ActiveRecord::Base.connection.execute("update dip_header_value t set t.enabled=0 where t.id in(#{value_str})")
+          ActiveRecord::Base.connection.execute(%{UPDATE DIP_COMBINATION_RECORDS t2
+              SET t2.ENABLED = 3
+              WHERE
+                EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    DIP_COMBINATION_ITEMS t1
+                  WHERE
+                    t1.HEADER_VALUE_ID in (#{value_str})
+                  AND t1.COMBINATION_RECORD_ID = t2."ID"
+                )})
         end
       end
       result[:msg]=[t(:label_operation_success)]
@@ -173,27 +140,18 @@ class Dip::HeaderValueController < ApplicationController
     end
   end
 
-  def disable_value_related(id)
-    items=Dip::CombinationItem.where(:header_value_id => id)
-    items.each do |item|
-      if (Dip::CombinationRecord.find(item.combination_record_id))
-        rec=Dip::CombinationRecord.find(item.combination_record_id)
-        rec.update_attributes({:enabled => false})
-      end
-    end
-  end
   def sync_value
     error_flag=false
     Dip::Header.where("1=1").each do |h|
       Dip::CommonModel.find_by_sql("select * from dip_values t where t.value_set_code='#{h[:code]}'").each do |v|
-       value= Dip::HeaderValue.where({:header_id=>h[:id],:code=>v[:value_code]}).first
+        value= Dip::HeaderValue.where({:header_id => h[:id], :code => v[:value_code]}).first
         unless value
           begin
-          Dip::HeaderValue.new({:header_id=>h[:id],
-                                :code=>v[:value_code],
-                                :value=>v[:value],
-                                :enabled=>0}).save
-          rescue =>ex
+            Dip::HeaderValue.new({:header_id => h[:id],
+                                  :code => v[:value_code],
+                                  :value => v[:value],
+                                  :enabled => 0}).save
+          rescue => ex
             error_flag=true
             logger.error(ex)
           end
@@ -202,7 +160,7 @@ class Dip::HeaderValueController < ApplicationController
     end
     respond_to do |format|
       format.json {
-        render :json => error_flag ? (t(:label_sync_org_with_error).to_json):(t(:label_sync_org_success).to_json)
+        render :json => error_flag ? (t(:label_sync_org_with_error).to_json) : (t(:label_sync_org_success).to_json)
       }
     end
   end
