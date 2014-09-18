@@ -85,10 +85,12 @@ class Dip::TemplateController < ApplicationController
     category_id=params[:category_id]
     sql="select t1.* from DIP_TEMPLATE t1,DIP_AUTHORITYXES t2 where t1.\"ID\"=t2.\"FUNCTION\" and t2.FUNCTION_TYPE='TEMPLATE' and t2.PERSON_ID='#{Irm::Person.current.id}'"
     if category_id
-      categories=Dip::DipCategory.get_all_child(category_id)
-      sql << " and  t1.template_category_id in (#{categories.collect { |c| "'#{c}'" }.join(",")})"
-    else
-      sql << ' and  t1.template_category_id is null'
+      if category_id=="unclassified"
+        sql << ' and  t1.template_category_id is null'
+      else
+        categories=Dip::DipCategory.get_all_child(category_id)
+        sql << " and  t1.template_category_id in (#{categories.collect { |c| "'#{c}'" }.join(",")})"
+      end
     end
     if params[:name]
       sql << " and upper(t1.name) like upper('%#{Dip::Utils.filter_sql(params[:name])}%') "
