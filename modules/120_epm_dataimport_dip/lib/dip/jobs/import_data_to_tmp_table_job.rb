@@ -166,12 +166,12 @@ module Dip
           host=Ironmine::Application.config.database_configuration[Rails.env]["host"].to_s
           database=Ironmine::Application.config.database_configuration[Rails.env]["database"].to_s
           port=Ironmine::Application.config.database_configuration[Rails.env]["port"].to_s
-          reader=Rjb.import("org.hexj.RowReader")
-          excelReaderUtil=Rjb.import("org.hexj.ExcelReaderUtil")
+          reader=Rjb.import("org.hexj.hdm.RowReader")
+          excelReaderUtil=Rjb.import("org.hexj.excelhandler.reader.ExcelReaderUtil")
           Delayed::Worker.logger.info "jdbc:oracle:thin:@#{host}:#{port}:#{database}"
           Delayed::Worker.logger.info sql_stat
-          excel_reader=reader.new("jdbc:oracle:thin:@#{host}:#{port}:#{database.split("\.")[0]}", userName, userPwd, sql_stat,"", header_count)
-          excelReaderUtil.readExcel(excel_reader, file_name)
+          excel_reader=reader.new("jdbc:oracle:thin:@#{host}:#{port}:#{database.split("\.")[0]}", userName, userPwd, sql_stat, header_count)
+          excelReaderUtil.readExcel(excel_reader, file_name,true)
           excel_reader.end_read()
           status=Dip::ImportManagement.where(:batch_id => batchId).first
           status.update_attributes({:percent => 100}) if status
