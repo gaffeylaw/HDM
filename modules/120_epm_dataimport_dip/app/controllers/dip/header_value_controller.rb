@@ -17,7 +17,7 @@ class Dip::HeaderValueController < ApplicationController
         if ("true"==v["enabled"])
           begin
             id=Dip::HeaderValue.where(:header_id => v["header_id"], :value => v["value"], :code => v["code"]).first.id
-            enable_new_value(id)
+            Dip::Combination.enable_new_value(v[:id],true)
             headerValue.errors.add("success_msg_only", t(:label_operation_success));
           rescue => ex
             logger.error ex

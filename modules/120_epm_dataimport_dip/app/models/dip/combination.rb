@@ -38,6 +38,9 @@ class Dip::Combination < ActiveRecord::Base
           end
           sql_from << "(select t.\"ID\" from DIP_HEADER_VALUE t where t.enabled=1 and t.HEADER_ID='#{header[:header_id]}') t#{i+1}"
         end
+        if sql_from==" from "
+          sql_from << "dual"
+        end
         sql=sql_select+sql_from
         res=ActiveRecord::Base.connection.execute(sql)
         r_count=1
