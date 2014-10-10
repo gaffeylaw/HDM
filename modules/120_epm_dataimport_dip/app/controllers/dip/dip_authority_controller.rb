@@ -57,7 +57,6 @@ class Dip::DipAuthorityController < ApplicationController
       values= values.match_value("value", params[:value])
       datas, count=paginate(values)
     end
-    syncAuthority()
     respond_to do |format|
       format.html {
         @datas = datas
@@ -79,6 +78,7 @@ class Dip::DipAuthorityController < ApplicationController
                                          :function_type => Dip::DipConstant::AUTHORITY_VALUE})
         authority.save
       end
+      syncAuthority()
     end
     respond_to do |format|
       format.json {
@@ -167,6 +167,28 @@ class Dip::DipAuthorityController < ApplicationController
     end
   end
   def syncAuthority
+    Dip::DipAuthority.mutex().lock
+    version=UUID.new.generate(:compact)
+    Irm::Person.select("ID,ORGANIZATION_ID").all.each do|p|
+      Dip::CommonModel.find_by_sql(%{select t1.FUNCTION,t1.FUNCTION_TYPE from DIP_DIP_AUTHORITIES t1,
+          (select t.id from IRM_ORGANIZATIONS t start with t.id='#{p[:organization_id]}'
+          connect by t.id= prior t.PARENT_ORG_ID)t2
+          where t1.TARGET_TYPE='GROUP' and
+          t1.target=t2.id
+          union
+          select t3.FUNCTION,t3.FUNCTION_TYPE from DIP_DIP_AUTHORITIES t3 where t3.target='#{p[:id]}'
+          and t3.target_type='PERSON'}).each do|auth|
+        Dip::Authorityx.new({:person_id=>p[:id],
+                             :function_type=>auth[:function_type],
+                             :function=>auth[:function],
+                             :version=>version}).save
+      end
+    end
+    ActiveRecord::Base.connection().execute("delete from dip_authorityxes t where t.version <>'#{version}'")
+    Dip::DipAuthority.mutex().unlock
+  end
+
+  def syncAuthority1
     Dip::DipAuthority.mutex().lock
     version=UUID.new.generate(:compact)
     ActiveRecord::Base.connection().execute("update dip_authorityxes t set t.version=null")
@@ -267,8 +289,8 @@ class Dip::DipAuthorityController < ApplicationController
                                          :function_type => Dip::DipConstant::AUTHORITY_REPORT})
         authority.save
       end
+      syncAuthority()
     end
-    syncAuthority()
     respond_to do |format|
       format.json {
         render :json => nil
@@ -332,8 +354,8 @@ class Dip::DipAuthorityController < ApplicationController
                                          :function_type => Dip::DipConstant::AUTHORITY_ODI})
         authority.save
       end
+      syncAuthority()
     end
-    syncAuthority()
     respond_to do |format|
       format.json {
         render :json => nil
@@ -397,8 +419,8 @@ class Dip::DipAuthorityController < ApplicationController
                                          :function_type => Dip::DipConstant::AUTHORITY_INFORMATICA})
         authority.save
       end
+      syncAuthority()
     end
-    syncAuthority()
     respond_to do |format|
       format.json {
         render :json => nil

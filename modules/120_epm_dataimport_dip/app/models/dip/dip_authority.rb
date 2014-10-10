@@ -60,9 +60,7 @@ class Dip::DipAuthority < ActiveRecord::Base
 
   def self.authorized?(target, function)
     flag=false
-    targets= get_all_parent(target, Dip::DipConstant::AUTHORITY_PERSON)
-    targets_str=targets.collect { |t| "'"+t+"'" }.join(",")
-    sql="select * from dip_dip_authorities t where t.target in (#{targets_str}) and t.function='#{function}'"
+    sql="select 1 from DIP_AUTHORITYXES t where t.PERSON_ID='#{target}' and t.FUNCTION='#{function}'"
     unless Dip::DipAuthority.find_by_sql(sql).empty?
       flag=true
     end
