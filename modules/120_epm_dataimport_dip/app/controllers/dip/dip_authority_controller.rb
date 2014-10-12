@@ -188,6 +188,7 @@ class Dip::DipAuthorityController < ApplicationController
     Dip::DipAuthority.mutex().unlock
   end
 
+
   def syncAuthority1
     Dip::DipAuthority.mutex().lock
     version=UUID.new.generate(:compact)
