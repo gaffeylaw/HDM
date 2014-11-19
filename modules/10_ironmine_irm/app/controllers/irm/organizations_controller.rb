@@ -133,7 +133,7 @@ class Irm::OrganizationsController < ApplicationController
   def sync_org
     error_flag=false
     Dip::CommonModel.find_by_sql("select * from dip_organization").each do |org|
-      cur_org=Irm::Organization.where({:id=>org[:id]}).first
+      cur_org=Irm::Organization.where({:id=>org[:org_id]}).first
 
       if(cur_org)
           cur_org.update_attributes({:name=>org[:org_name],
@@ -142,12 +142,12 @@ class Irm::OrganizationsController < ApplicationController
       else
           new_org=Irm::Organization.new({
                                  :name=>org[:org_name],
-                                 :short_name=>org[:id],
+                                 :short_name=>org[:org_id],
                                  :parent_org_id=>org[:p_org_id]})
           begin
           new_org.save
-          ActiveRecord::Base.connection.execute("update IRM_ORGANIZATIONS t set t.id='#{org[:id]}' where t.id='#{new_org[:id]}'")
-          ActiveRecord::Base.connection.execute("update IRM_ORGANIZATIONS_TL t set t.organization_id='#{org[:id]}' where t.organization_id='#{new_org[:id]}'")
+          ActiveRecord::Base.connection.execute("update IRM_ORGANIZATIONS t set t.id='#{org[:org_id]}' where t.id='#{new_org[:id]}'")
+          ActiveRecord::Base.connection.execute("update IRM_ORGANIZATIONS_TL t set t.organization_id='#{org[:org_id]}' where t.organization_id='#{new_org[:id]}'")
           rescue => ex
             error_flag=true
             logger.error(ex)
