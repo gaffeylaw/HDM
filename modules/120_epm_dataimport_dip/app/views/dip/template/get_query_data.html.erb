@@ -1,11 +1,34 @@
 <%= datatable_view({:count => @count, :datas => @datas}) do |builder| %>
+    <% builder.column(:id, {:title => t(:operation), :width => "60px"}) do |data| %>
+        <a href="javascript:void(0)" onclick="edit_row(event,'<%= data[:row_id]%>')"><%= t(:edit) %></a>
+        <a href="javascript:void(0)" onclick="delete_row(event,'<%= data[:row_id]%>')"><%= t(:delete) %></a>
+    <% end %>
     <% @template_column.each do |v| %>
         <% builder.column(v.view_column.to_s.downcase, {:title => v.name, :width => (v.column_length).to_i.to_s, :sortable => true, :searchable => true}) do |data| %>
-            <label row_id="<%= data[:row_id] %>" style="display: block;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>                    <label data_id="<%= data[:row_id] %>"
+            <label row_id="<%= data[:row_id] %>" style="display: block;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>
+            <% if v[:value_list] %>
+                <input id="<%= data[:row_id]+v.id %>" type="text" autocomplete="off"
+                       data_id="<%= data[:row_id] %>"
+                       name="<%= v.view_column.to_s.downcase %>"
+                       combination_record="<%= data.combination_record %>"
+                       style="margin-bottom: 0px;display: none;width: 100%;"
+                       value="<%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %>"
+                       onfocus="add_autocomplete('<%=v.id%>','<%= data[:row_id]%>','<%= data[:combination_record]%>')"/>
+            <% else %>
+                <% if column_editable(v) %>
+                    <input data_id="<%= data[:row_id] %>"
+                           name="<%= v.view_column.to_s.downcase %>" type='text'
+                           style="margin-bottom: 0px;display: none;width: 100%;"
+                           combination_record="<%= data.combination_record %>"
+                           value="<%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %>"/>
+                <% else %>
+                    <label data_id="<%= data[:row_id] %>"
                            name="<%= v.view_column.to_s.downcase %>"
                            combination_record="<%= data.combination_record %>"
                            value="<%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %>"
                            style="display: none;margin-bottom: 0px;"><%= column_format(v.view_column.to_s.downcase, data[v.view_column.to_s.downcase]) %></label>
+                <% end %>
+            <% end %>
         <% end %>
     <% end %>
     <% ['updated_at', 'updated_by', 'created_at', 'created_by'].each do |h| %>
@@ -14,7 +37,7 @@
         <% end %>
     <% end %>
     <% @headers.each do |h| %>
-        <% builder.column("#{h[:code].to_s.downcase}_v", {:title => Dip::Header.find(h.header_id).name, :width => "180px"}) %>
+        <% builder.column("dip"+h.header_id.to_s.downcase, {:title => Dip::Header.find(h.header_id).name, :width => "80px"}) %>
     <% end %>
 <% end %>
 <script type="text/javascript">
@@ -36,3 +59,4 @@
             extraParams:extraParams});
     }
 </script>
+
